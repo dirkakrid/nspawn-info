@@ -37,6 +37,18 @@ systemd-nspawn -D template/
 systemd-nspawn -b -D template/ -n
 ```
 
+## Instance (from unpacked template)
+```text
+NAMED="name"
+PATHTO=/absolute/path/to/instance/$NAMED/
+if [ -d $PATHTO ]; then
+    rm -rf $PATHTO
+fi
+
+cp -R template $NAMED
+zypper --root $PATHTO in git nano
+```
+
 ## Useful references:
-[1] https://wiki.archlinux.org/index.php/Systemd-nspawn
-[2] http://rorgoroth.blogspot.com/2014/12/setting-up-bare-opensuse-systemd-nspawn.html
+1 https://wiki.archlinux.org/index.php/Systemd-nspawn
+2 http://rorgoroth.blogspot.com/2014/12/setting-up-bare-opensuse-systemd-nspawn.html
