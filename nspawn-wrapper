@@ -1,0 +1,72 @@
+INSTALL="install"
+CLONE="clone"
+REMOVE="remove"
+START="start"
+BOOT="boot"
+TEMPLATE="template"
+PATHTO="$PWD"
+ACTION=$1
+OBJECT=$2
+
+function print_help()
+{
+    printf "\nError: %0s\n\n" "$1"
+    printf "Usage: nspawn-wrapper [ACTION] [OBJECT]\n"
+    printf "%0s\n" "Provides a simple wrapper around systemd-nspawn"
+    printf "\t%0s\t%20s\n" "ACTION" "The action to perform ($INSTALL, $CLONE, $REMOVE, $START, $BOOT)"
+    printf "\t%0s\t%20s\n" "OBJECT" "The machine name to interact with"
+    printf "\n"
+    exit -1
+}
+
+function check_exists()
+{
+    if [ ! -d "$1" ]; then
+        echo "Object does not exist"
+        exit -1
+    fi
+}
+
+if [ $UID -ne 0 ]; then
+    print_help "Script must be run as root!"
+fi
+
+if [ -z "$ACTION" ]; then
+    print_help "Action is required!"
+fi
+
+if [ -z "$OBJECT" ]; then
+    print_help "Object is required!"
+fi
+
+OBJPATH=$PATHTO/$OBJECT
+case $ACTION in
+$CLONE)
+    if [ -d "$OBJPATH" ]; then
+        echo "Object with name $OBJECT already exists"
+        exit -1
+    fi
+
+    cp -R "$PATHTO/$TEMPLATE" $OBJECT
+    ;;
+$INSTALL)
+    check_exists "$OBJPATH"
+    zypper --root $OBJPATH in "${@:3}"
+    ;;
+$REMOVE)
+    check_exists "$OBJPATH"
+    rm -r $OBJECT
+    ;;
+$START)
+    check_exists "$OBJPATH"
+    systemd-nspawn -D "$OBJECT/"
+    ;;
+$BOOT)
+    check_exists "$OBJPATH"
+    systemd-nspawn -b -D "$OBJECT/" -n
+    ;;
+*)
+    print_help "Invalid action: $ACTION"
+    ;;
+esac
+
