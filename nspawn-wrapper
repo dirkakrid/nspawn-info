@@ -7,6 +7,7 @@ BOOT="boot"
 UPDATE="update"
 PACK="pack"
 UNPACK="unpack"
+CREATE="create"
 TEMPLATE="template"
 PATHTO="$PWD"
 ACTION=$1
@@ -18,7 +19,7 @@ function print_help()
     printf "Usage: nspawn-wrapper [ACTION] [OBJECT]\n"
     printf "%0s\n" "Provides a simple wrapper around systemd-nspawn"
     printf "\t%0s\t%20s\n" "ACTION" "The action to perform\n"
-    printf "\t\t($INSTALL, $CLONE, $REMOVE, $START, $BOOT, $UPDATE, $PACK, $UNPACK)\n"
+    printf "\t\t($INSTALL, $CLONE, $REMOVE, $START, $BOOT, $UPDATE, $PACK, $UNPACK, $CREATE)\n"
     printf "\t%0s\t%20s\n" "OBJECT" "The machine name to interact with"
     printf "\n"
     exit -1
@@ -28,6 +29,14 @@ function check_exists()
 {
     if [ ! -d "$1" ]; then
         echo "Object does not exist"
+        exit -1
+    fi
+}
+
+function check_not_exists()
+{
+    if [ -d "$1" ]; then
+        echo "Object $1 already exists"
         exit -1
     fi
 }
@@ -50,11 +59,7 @@ OBJPATH=$PATHTO/$OBJECT
 TARFILE="$OBJECT.tar.gz"
 case $ACTION in
 $CLONE)
-    if [ -d "$OBJPATH" ]; then
-        echo "Object with name $OBJECT already exists"
-        exit -1
-    fi
-
+    check_not_exists "$OBJPATH"
     cp -R "$PATHTO/$TEMPLATE" $OBJECT
     ;;
 $INSTALL)
@@ -88,17 +93,16 @@ $PACK)
     tar -cvpzf $TARFILE --one-file-system "$OBJECT/"
     ;;
 $UNPACK)
-    if [ -d "$OBJPATH" ]; then
-        echo "Object with name $OBJECT already exists"
-        exit -1
-    fi
- 
+    check_not_exists "$OBJPATH"
     if [ ! -e $TARFILE ]; then
         echo "No tar file found: $TARFILE"
         exit -1
     fi
 
     tar xzvf $TARFILE
+    ;;
+$CREATE)
+    check_not_exists "$OBJPATH"        
     ;;
 *)
     print_help "Invalid action: $ACTION"
