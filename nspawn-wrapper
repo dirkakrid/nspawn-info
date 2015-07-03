@@ -15,7 +15,8 @@ function print_help()
     printf "\nError: %0s\n\n" "$1"
     printf "Usage: nspawn-wrapper [ACTION] [OBJECT]\n"
     printf "%0s\n" "Provides a simple wrapper around systemd-nspawn"
-    printf "\t%0s\t%20s\n" "ACTION" "The action to perform ($INSTALL, $CLONE, $REMOVE, $START, $BOOT, $UPDATE)"
+    printf "\t%0s\t%20s\n" "ACTION" "The action to perform\n"
+    printf "\t\t($INSTALL, $CLONE, $REMOVE, $START, $BOOT, $UPDATE)\n"
     printf "\t%0s\t%20s\n" "OBJECT" "The machine name to interact with"
     printf "\n"
     exit -1
