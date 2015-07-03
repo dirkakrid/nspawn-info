@@ -1,8 +1,10 @@
+#!/bin/bash
 INSTALL="install"
 CLONE="clone"
 REMOVE="remove"
 START="start"
 BOOT="boot"
+UPDATE="update"
 TEMPLATE="template"
 PATHTO="$PWD"
 ACTION=$1
@@ -13,7 +15,7 @@ function print_help()
     printf "\nError: %0s\n\n" "$1"
     printf "Usage: nspawn-wrapper [ACTION] [OBJECT]\n"
     printf "%0s\n" "Provides a simple wrapper around systemd-nspawn"
-    printf "\t%0s\t%20s\n" "ACTION" "The action to perform ($INSTALL, $CLONE, $REMOVE, $START, $BOOT)"
+    printf "\t%0s\t%20s\n" "ACTION" "The action to perform ($INSTALL, $CLONE, $REMOVE, $START, $BOOT, $UPDATE)"
     printf "\t%0s\t%20s\n" "OBJECT" "The machine name to interact with"
     printf "\n"
     exit -1
@@ -64,6 +66,11 @@ $START)
 $BOOT)
     check_exists "$OBJPATH"
     systemd-nspawn -b -D "$OBJECT/" -n
+    ;;
+$UPDATE)
+    check_exists "$OBJPATH"
+    zypper --root $OBJPATH ref
+    zypper --root $OBJPATH up
     ;;
 *)
     print_help "Invalid action: $ACTION"
