@@ -31,7 +31,8 @@ function check_exists()
 }
 
 if [ $UID -ne 0 ]; then
-    print_help "Script must be run as root!"
+    printf "\nRestarting script using sudo\n"
+    sudo $PWD\nspawn-info
 fi
 
 if [ -z "$ACTION" ]; then
