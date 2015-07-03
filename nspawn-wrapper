@@ -9,6 +9,11 @@ PACK="pack"
 UNPACK="unpack"
 CREATE="create"
 TEMPLATE="template"
+REPOS="oss non-oss debug"
+BASEURL="http://download.opensuse.org"
+REPOURL="$BASEURL/tumbleweed/repo"
+UPDATEREPO="$BASEURL/update/tumbleweed repo-update"
+INSTALLSET="patterns-openSUSE-64bit patterns-openSUSE-base zypper rpm"
 PATHTO="$PWD"
 ACTION=$1
 OBJECT=$2
@@ -103,9 +108,14 @@ $UNPACK)
     ;;
 $CREATE)
     check_not_exists "$OBJPATH"        
+    for repo in $(echo $REPOS); do
+        zypper --root $OBJPATH ar -f -c $REPOURL/$repo repo-$repo
+    done
+    
+    zypper --root $OBJPATH ar -f -c $UPDATEREPO
+    zypper --root $OBJPATH in $INSTALLSET
     ;;
 *)
     print_help "Invalid action: $ACTION"
     ;;
 esac
-
