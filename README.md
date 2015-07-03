@@ -1,52 +1,41 @@
 # nspawn-info
-systemd-nspawn setup/configuration/information for usage/integration (opensuse tumbleweed)
+systemd-nspawn setup/configuration/information for usage/integration (opensuse tumbleweed). The wrapper 
+script provides the general structure of performing the following and is reasonable starting point
 
 ## Creation (template)
 ```text
-PATHTO=/absolute/path/to/template/
-zypper --root $PATHTO ar -f -c http://download.opensuse.org/tumbleweed/repo/oss repo-oss
-zypper --root $PATHTO ar -f -c http://download.opensuse.org/tumbleweed/repo/non-oss repo-non-oss
-zypper --root $PATHTO ar -f -c http://download.opensuse.org/tumbleweed/repo/debug repo-debug
-zypper --root $PATHTO ar -f -c http://download.opensuse.org/update/tumbleweed repo-update
-zypper --root $PATHTO in patterns-openSUSE-64bit patterns-openSUSE-base zypper rpm
+./nspawn-wrapper create template
 ```
 
 ## Install more packages (template)
 ```text
-PATHTO=/absolute/path/to/template/
-zypper --root $PATHTO in git nano
+./nspawn-wrapper install template package1 package2...
 ```
 
 ## Storage (template)
 ```text
-tar -cvpzf template.tar.gz --one-file-system template/
+./nspawn-wrapper pack template
 ```
 
 ## Unpack (template)
 ```text
-tar xzvf template.tar.gz
+./nspawn-wrapper unpack template
 ```
 
 ## Start (not boot)
-```text
-systemd-nspawn -D template/
+```text'
+./nspawn-wrapper start template
 ```
+
 
 ## Start (boot with network)
 ```text
-systemd-nspawn -b -D template/ -n
+./nspawn-wrapper boot template
 ```
 
 ## Instance (from unpacked template)
 ```text
-NAMED="name"
-PATHTO=/absolute/path/to/instance/$NAMED/
-if [ -d $PATHTO ]; then
-    rm -rf $PATHTO
-fi
-
-cp -R template $NAMED
-zypper --root $PATHTO in git nano
+./nspawn-wrapper clone copy-of-template
 ```
 
 ## Useful references:
