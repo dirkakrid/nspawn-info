@@ -81,7 +81,7 @@ $START)
     ;;
 $BOOT)
     check_exists "$OBJPATH"
-    systemd-nspawn -b -D "$OBJECT/" -n -M "$OBJECT"
+    systemd-nspawn -b -D "$OBJECT/" -M "$OBJECT"
     ;;
 $UPDATE)
     check_exists "$OBJPATH"
