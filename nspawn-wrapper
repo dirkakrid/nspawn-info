@@ -77,11 +77,11 @@ $REMOVE)
     ;;
 $START)
     check_exists "$OBJPATH"
-    systemd-nspawn -D "$OBJECT/" -M "$OBJECT"
+    systemd-nspawn -D "$OBJECT/" -M "$OBJECT" "${@:3}"
     ;;
 $BOOT)
     check_exists "$OBJPATH"
-    systemd-nspawn -b -D "$OBJECT/" -M "$OBJECT"
+    systemd-nspawn -b -D "$OBJECT/" -M "$OBJECT" "${@:3}"
     ;;
 $UPDATE)
     check_exists "$OBJPATH"
