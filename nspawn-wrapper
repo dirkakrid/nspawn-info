@@ -65,12 +65,16 @@ fi
 
 if [ "$ACTION" == "$REFRESH" ]; then
     echo "Refreshing all"
+    EXIT_CODES=0
     ALL_ITEMS=$(echo */)
     for i in ${ALL_ITEMS[*]}; do
         echo -e "\033[0;31m$i\033[0m"
         $SCRIPT_LOCATION $UPDATE $i
+        if [ $? -ne 0 ]; then
+            EXIT_CODES=-1
+        fi
     done
-    exit 0
+    exit $EXIT_CODES
 fi
 
 if [ -z "$OBJECT" ]; then
