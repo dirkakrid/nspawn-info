@@ -8,6 +8,7 @@ UPDATE="update"
 PACK="pack"
 UNPACK="unpack"
 CREATE="create"
+REFRESH="refresh"
 TEMPLATE="template"
 REPOS="oss non-oss debug"
 BASEURL="http://download.opensuse.org"
@@ -24,7 +25,7 @@ function print_help()
     printf "Usage: nspawn-wrapper [ACTION] [OBJECT]\n"
     printf "%0s\n" "Provides a simple wrapper around systemd-nspawn"
     printf "\t%0s\t%20s\n" "ACTION" "The action to perform\n"
-    printf "\t\t($INSTALL, $CLONE, $REMOVE, $START, $BOOT, $UPDATE, $PACK, $UNPACK, $CREATE)\n"
+    printf "\t\t($INSTALL, $CLONE, $REMOVE, $START, $BOOT, $UPDATE, $PACK, $UNPACK, $CREATE, $REFRESH)\n"
     printf "\t%0s\t%20s\n" "OBJECT" "The machine name to interact with"
     printf "\n"
     exit -1
@@ -54,6 +55,16 @@ fi
 
 if [ -z "$ACTION" ]; then
     print_help "Action is required!"
+fi
+
+if [ "$ACTION" == "$REFRESH" ]; then
+    echo "Refreshing all"
+    ALL_ITEMS=$(echo */)
+    for i in ${ALL_ITEMS[*]}; do
+        echo -e "\033[0;31m$i\033[0m"
+        $PWD/nspawn-wrapper $UPDATE $i
+    done
+    exit 0
 fi
 
 if [ -z "$OBJECT" ]; then
