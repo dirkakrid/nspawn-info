@@ -38,6 +38,16 @@ script provides the general structure of performing the following and is reasona
 ./nspawn-wrapper clone copy-of-template
 ```
 
+### Notes
+* Share X with the container via this:
+```text
+# host
+xhost +local: > /dev/null 2>&1
+
+# container
+export DISPLAY=:0
+```
+
 ## Useful references:
 [1] https://wiki.archlinux.org/index.php/Systemd-nspawn
 
