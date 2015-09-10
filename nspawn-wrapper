@@ -16,6 +16,7 @@ REPOURL="$BASEURL/tumbleweed/repo"
 UPDATEREPO="$BASEURL/update/tumbleweed repo-update"
 INSTALLSET="patterns-openSUSE-64bit patterns-openSUSE-base zypper rpm"
 PATHTO="$PWD"
+SCRIPT_LOCATION="$PWD/nspawn-wrapper"
 ACTION=$1
 OBJECT=$2
 
@@ -54,7 +55,7 @@ function check_not_exists()
 
 if [ $UID -ne 0 ]; then
     printf "\nRestarting script using sudo\n"
-    sudo $PWD/nspawn-wrapper $@
+    sudo $SCRIPT_LOCATION $@
     exit $?
 fi
 
@@ -67,7 +68,7 @@ if [ "$ACTION" == "$REFRESH" ]; then
     ALL_ITEMS=$(echo */)
     for i in ${ALL_ITEMS[*]}; do
         echo -e "\033[0;31m$i\033[0m"
-        $PWD/nspawn-wrapper $UPDATE $i
+        $SCRIPT_LOCATION $UPDATE $i
     done
     exit 0
 fi
