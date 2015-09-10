@@ -47,8 +47,20 @@ xhost +local: > /dev/null 2>&1
 # container
 export DISPLAY=:0
 ```
+* Booting debian in another distro
+```text
+# Using debootstrap
+zypper in debootstrap
+debootstrap --arch=amd64 unstable debian/
+systemd-nspawn -D debian/
+
+# Full system in the container
+systemd-nspawn -D debian-tree/ /sbin/init
+```
 
 ## Useful references:
 [1] https://wiki.archlinux.org/index.php/Systemd-nspawn
 
 [2] http://rorgoroth.blogspot.com/2014/12/setting-up-bare-opensuse-systemd-nspawn.html
+
+[3] http://0pointer.de/blog/projects/changing-roots.html
