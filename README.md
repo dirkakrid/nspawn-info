@@ -58,9 +58,17 @@ systemd-nspawn -D debian/
 systemd-nspawn -D debian-tree/ /sbin/init
 ```
 
+* Enable root access (disable by default in openSUSE)
+```text
+echo console >> /etc/securetty
+sed -i 's/session\s*required\s*pam_loginuid.so/#session    required     pam_loginuid.so/' /etc/pam.d/login
+```
+
 ## Useful references:
 [1] https://wiki.archlinux.org/index.php/Systemd-nspawn
 
 [2] http://rorgoroth.blogspot.com/2014/12/setting-up-bare-opensuse-systemd-nspawn.html
 
 [3] http://0pointer.de/blog/projects/changing-roots.html
+
+[4] http://www.do-not-panic.com/2014/08/hacking-on-systemd-with-opensuse.html
