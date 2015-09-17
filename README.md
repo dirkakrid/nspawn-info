@@ -4,7 +4,8 @@ script provides the general structure of performing the following and is reasona
 
 ## Using the script
 * Download the nspawn script to preferred location and update the placeholders
-| Item             | Description                                             |
+
+| Name             | URI                                                     |
 |------------------|---------------------------------------------------------|
 | {CONTAINERS}     | The path where containers should be stored              |
 | {PATH_TO_SCRIPT} | Path where the nspawn script is stored (directory only) |
