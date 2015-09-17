@@ -33,6 +33,34 @@ nspawn clone copy-of-template
 ```
 
 ### Notes
+* Create the 'base' container (template) for tumbleweed:
+```text
+mkdir  /absolute/path/to/template
+
+# For each 'necessary' repository add it
+zypper --root /absolute/path/to/template/ ar -f -c {url} {name}
+
+# Install the packages for a base container
+zypper --root /absolute/path/to/template/ in patterns-openSUSE-64bit patterns-openSUSE-base zypper rpm
+```
+
+* Create the 'base' container (template) for tumbleweed using these repos:
+Alias               | Name         | URI
+--------------------|--------------|--------------------------------------------------------------
+repo-non-oss        | repo-non-oss | http://download.opensuse.org/tumbleweed/repo/non-oss
+repo-oss            | repo-oss     | http://download.opensuse.org/tumbleweed/repo/oss
+repo-debug          | repo-debug   | http://download.opensuse.org/tumbleweed/repo/debug
+repo-update         | repo-update  | http://download.opensuse.org/update/tumbleweed
+
+
+* Create the 'base' container (template) for 13.2 using these repos:
+Alias               | Name                | URI
+--------------------|---------------------|--------------------------------------------------------------
+repo-non-oss        | repo-non-oss        | http://download.opensuse.org/distribution/13.2/repo/non-oss/
+repo-oss            | repo-oss            | http://download.opensuse.org/distribution/13.2/repo/oss/
+repo-update         | repo-update         | http://download.opensuse.org/update/13.2/
+repo-update-non-oss | repo-update-non-oss | http://download.opensuse.org/update/13.2-non-oss/
+
 * Share X with the container via this:
 ```text
 # host
