@@ -96,3 +96,5 @@ sed -i 's/session\s*required\s*pam_loginuid.so/#session    required     pam_logi
 [3] http://0pointer.de/blog/projects/changing-roots.html
 
 [4] http://www.do-not-panic.com/2014/08/hacking-on-systemd-with-opensuse.html
+
+[5] https://en.opensuse.org/User:Tsu2/chroot-nspawn-OpenStack
