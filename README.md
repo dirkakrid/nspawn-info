@@ -97,6 +97,10 @@ echo console >> /etc/securetty
 sed -i 's/session\s*required\s*pam_loginuid.so/#session    required     pam_loginuid.so/' /etc/pam.d/login
 ```
 
+## Going forward
+* Currently this is used mainly in 13.2 (for stability) which restricts it somewhat
+* Hopefully, once the next major (stable) version is released options like overlayfs would be available (to be explored in the future)
+
 ## Useful references:
 [1] https://wiki.archlinux.org/index.php/Systemd-nspawn
 
