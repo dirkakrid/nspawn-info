@@ -46,22 +46,22 @@ zypper --root /absolute/path/to/template/ in patterns-openSUSE-64bit patterns-op
 
 * Create the 'base' container (template) for tumbleweed using these repos:
 
-| Alias               | Name         | URI                                                    |
-|---------------------|--------------|--------------------------------------------------------|
-| repo-non-oss        | repo-non-oss | http://download.opensuse.org/tumbleweed/repo/non-oss   |
-| repo-oss            | repo-oss     | http://download.opensuse.org/tumbleweed/repo/oss       |
-| repo-debug          | repo-debug   | http://download.opensuse.org/tumbleweed/repo/debug     |
-| repo-update         | repo-update  | http://download.opensuse.org/update/tumbleweed         |
+| Name         | URI                                                    |
+|--------------|--------------------------------------------------------|
+| repo-non-oss | http://download.opensuse.org/tumbleweed/repo/non-oss   |
+| repo-oss     | http://download.opensuse.org/tumbleweed/repo/oss       |
+| repo-debug   | http://download.opensuse.org/tumbleweed/repo/debug     |
+| repo-update  | http://download.opensuse.org/update/tumbleweed         |
 
 
 * Create the 'base' container (template) for 13.2 using these repos:
 
-| Alias               | Name                | URI                                                           |
-|---------------------|---------------------|---------------------------------------------------------------|
-| repo-non-oss        | repo-non-oss        | http://download.opensuse.org/distribution/13.2/repo/non-oss/  |
-| repo-oss            | repo-oss            | http://download.opensuse.org/distribution/13.2/repo/oss/      |
-| repo-update         | repo-update         | http://download.opensuse.org/update/13.2/                     |
-| repo-update-non-oss | repo-update-non-oss | http://download.opensuse.org/update/13.2-non-oss/             |
+| Name                | URI                                                           |
+|---------------------|---------------------------------------------------------------|
+| repo-non-oss        | http://download.opensuse.org/distribution/13.2/repo/non-oss/  |
+| repo-oss            | http://download.opensuse.org/distribution/13.2/repo/oss/      |
+| repo-update         | http://download.opensuse.org/update/13.2/                     |
+| repo-update-non-oss | http://download.opensuse.org/update/13.2-non-oss/             |
 
 * Share X with the container via this:
 ```text
