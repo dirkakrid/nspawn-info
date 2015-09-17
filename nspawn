@@ -7,20 +7,14 @@ BOOT="boot"
 UPDATE="update"
 PACK="pack"
 UNPACK="unpack"
-CREATE="create"
 REFRESH="refresh"
 TEMPLATE="template"
-REPOS="oss non-oss debug"
-BASEURL="http://download.opensuse.org"
-REPOURL="$BASEURL/tumbleweed/repo"
-UPDATEREPO="$BASEURL/update/tumbleweed repo-update"
-INSTALLSET="patterns-openSUSE-64bit patterns-openSUSE-base zypper rpm"
-PATHTO="$PWD"
-SCRIPT_LOCATION="$PWD/nspawn-wrapper"
+PATHTO="{CONTAINERS}"
 ACTION=$1
 OBJECT=$2
+SCRIPTLOCATION="{PATH_TO_SCRIPT}nspawn"
+SHARED_LOCATION="{SHARED}"
 
-# Remove a trailing '/' if there is one
 if [[ "$OBJECT" == */ ]]; then
     OBJECT=${OBJECT::-1}
 fi
@@ -31,7 +25,7 @@ function print_help()
     printf "Usage: nspawn-wrapper [ACTION] [OBJECT]\n"
     printf "%0s\n" "Provides a simple wrapper around systemd-nspawn"
     printf "\t%0s\t%20s\n" "ACTION" "The action to perform\n"
-    printf "\t\t($INSTALL, $CLONE, $REMOVE, $START, $BOOT, $UPDATE, $PACK, $UNPACK, $CREATE, $REFRESH)\n"
+    printf "\t\t($INSTALL, $CLONE, $REMOVE, $START, $BOOT, $UPDATE, $PACK, $UNPACK, $REFRESH)\n"
     printf "\t%0s\t%20s\n" "OBJECT" "The machine name to interact with"
     printf "\n"
     exit -1
@@ -53,9 +47,11 @@ function check_not_exists()
     fi
 }
 
+# Make X available
+xhost +local: > /dev/null 2>&1
 if [ $UID -ne 0 ]; then
     printf "\nRestarting script using sudo\n"
-    sudo $SCRIPT_LOCATION $@
+    sudo $SCRIPTLOCATION $@
     exit $?
 fi
 
@@ -66,10 +62,10 @@ fi
 if [ "$ACTION" == "$REFRESH" ]; then
     echo "Refreshing all"
     EXIT_CODES=0
-    ALL_ITEMS=$(echo */)
+    ALL_ITEMS=$(ls $PATHTO)
     for i in ${ALL_ITEMS[*]}; do
         echo -e "\033[0;31m$i\033[0m"
-        $SCRIPT_LOCATION $UPDATE $i
+        $SCRIPTLOCATION $UPDATE $i
         if [ $? -ne 0 ]; then
             EXIT_CODES=-1
         fi
@@ -86,7 +82,7 @@ TARFILE="$OBJECT.tar.gz"
 case $ACTION in
 $CLONE)
     check_not_exists "$OBJPATH"
-    cp -R "$PATHTO/$TEMPLATE" $OBJECT
+    cp -R "$PATHTO/$TEMPLATE" $OBJPATH
     ;;
 $INSTALL)
     check_exists "$OBJPATH"
@@ -94,15 +90,15 @@ $INSTALL)
     ;;
 $REMOVE)
     check_exists "$OBJPATH"
-    rm -r $OBJECT
+    rm -r $OBJPATH
     ;;
 $START)
     check_exists "$OBJPATH"
-    systemd-nspawn -D "$OBJECT/" -M "$OBJECT" "${@:3}"
+    screen -S "$OBJECT" systemd-nspawn -D "$OBJPATH/" -M "$OBJECT" --bind $SHARED_LOCATION "${@:3}"
     ;;
 $BOOT)
     check_exists "$OBJPATH"
-    systemd-nspawn -b -D "$OBJECT/" -M "$OBJECT" "${@:3}"
+    screen -S "$OBJECT" systemd-nspawn -b -D "$OBJPATH/" -M "$OBJECT" --bind $SHARED_LOCATION "${@:3}"
     ;;
 $UPDATE)
     check_exists "$OBJPATH"
@@ -116,7 +112,7 @@ $PACK)
         exit -1
     fi
 
-    tar -cvpzf $TARFILE --one-file-system "$OBJECT/"
+    tar -cvpzf $TARFILE --one-file-system "$OBJPATH/"
     ;;
 $UNPACK)
     check_not_exists "$OBJPATH"
@@ -126,15 +122,6 @@ $UNPACK)
     fi
 
     tar xzvf $TARFILE
-    ;;
-$CREATE)
-    check_not_exists "$OBJPATH"        
-    for repo in $(echo $REPOS); do
-        zypper --root $OBJPATH ar -f -c $REPOURL/$repo repo-$repo
-    done
-    
-    zypper --root $OBJPATH ar -f -c $UPDATEREPO
-    zypper --root $OBJPATH in $INSTALLSET
     ;;
 *)
     print_help "Invalid action: $ACTION"

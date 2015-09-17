@@ -2,40 +2,34 @@
 systemd-nspawn setup/configuration/information for usage/integration (opensuse tumbleweed). The wrapper 
 script provides the general structure of performing the following and is reasonable starting point
 
-## Creation (template)
-```text
-./nspawn-wrapper create template
-```
-
 ## Install more packages (template)
 ```text
-./nspawn-wrapper install template package1 package2...
+nspawn install template package1 package2...
 ```
 
 ## Storage (template)
 ```text
-./nspawn-wrapper pack template
+nspawn pack template
 ```
 
 ## Unpack (template)
 ```text
-./nspawn-wrapper unpack template
+nspawn unpack template
 ```
 
 ## Start (not boot)
 ```text'
-./nspawn-wrapper start template
+nspawn start template
 ```
-
 
 ## Start (boot with network)
 ```text
-./nspawn-wrapper boot template
+nspawn boot template
 ```
 
 ## Instance (from unpacked template)
 ```text
-./nspawn-wrapper clone copy-of-template
+nspawn clone copy-of-template
 ```
 
 ### Notes
