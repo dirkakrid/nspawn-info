@@ -9,6 +9,7 @@ PACK="pack"
 UNPACK="unpack"
 REFRESH="refresh"
 TEMPLATE="template"
+RESUME="resume"
 PATHTO="{CONTAINERS}"
 ACTION=$1
 OBJECT=$2
@@ -25,7 +26,7 @@ function print_help()
     printf "Usage: nspawn-wrapper [ACTION] [OBJECT]\n"
     printf "%0s\n" "Provides a simple wrapper around systemd-nspawn"
     printf "\t%0s\t%20s\n" "ACTION" "The action to perform\n"
-    printf "\t\t($INSTALL, $CLONE, $REMOVE, $START, $BOOT, $UPDATE, $PACK, $UNPACK, $REFRESH)\n"
+    printf "\t\t($INSTALL, $CLONE, $REMOVE, $START, $BOOT, $UPDATE, $PACK, $UNPACK, $REFRESH, $RESUME)\n"
     printf "\t%0s\t%20s\n" "OBJECT" "The machine name to interact with"
     printf "\n"
     exit -1
@@ -99,6 +100,9 @@ $START)
 $BOOT)
     check_exists "$OBJPATH"
     screen -S "$OBJECT" systemd-nspawn -b -D "$OBJPATH/" -M "$OBJECT" --bind $SHARED_LOCATION "${@:3}"
+    ;;
+$RESUME)
+    screen -r "$OBJECT"
     ;;
 $UPDATE)
     check_exists "$OBJPATH"
