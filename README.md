@@ -33,7 +33,7 @@ nspawn clone copy-of-template
 ```
 
 ### Notes
-* Create the 'base' container (template) for tumbleweed:
+* Create the 'base' container (template) using these 'basic' steps:
 ```text
 mkdir  /absolute/path/to/template
 
