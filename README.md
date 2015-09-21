@@ -47,9 +47,19 @@ nspawn clone copy-of-template
 #!/bin/bash
 _nspawn()
 {
-    local cur=${COMP_WORDS[COMP_CWORD]}
-    NSPAWN_OPTS=$(nspawn options)
-    COMPREPLY=( $(compgen -W "$NSPAWN_OPTS" -- $cur) )
+    local cur prev
+    cur=${COMP_WORDS[COMP_CWORD]}
+    prev=${COMP_WORDS[COMP_CWORD-1]}
+    if [ $COMP_CWORD -eq 1 ]; then
+        NSPAWN_OPTS=$(nspawn options)
+        COMPREPLY=( $(compgen -W "$NSPAWN_OPTS" -- $cur) )
+    else
+        FIRST=$(echo $prev | grep 'list\|help\|options\|refresh')
+        if [ -z $FIRST ]; then
+            NSPAWN_OPTS=$(nspawn list)  
+            COMPREPLY=( $(compgen -W "$NSPAWN_OPTS" -- $cur) )
+        fi
+    fi
 }
 complete -F _nspawn nspawn
 ```
