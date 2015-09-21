@@ -12,12 +12,13 @@ TEMPLATE="template"
 RESUME="resume"
 OPTIONS="options"
 HELP="help"
+LIST="list"
 PATHTO="{CONTAINERS}"
 ACTION=$1
 OBJECT=$2
 SCRIPTLOCATION="{PATH_TO_SCRIPT}nspawn"
 SHARED_LOCATION="{SHARED}"
-ALL_OPTS="$INSTALL $CLONE $REMOVE $START $BOOT $UPDATE $PACK $UNPACK $REFRESH $RESUME $OPTIONS $HELP"
+ALL_OPTS="$INSTALL $CLONE $REMOVE $START $BOOT $UPDATE $PACK $UNPACK $REFRESH $RESUME $OPTIONS $HELP $LIST"
 if [[ "$OBJECT" == */ ]]; then
     OBJECT=${OBJECT::-1}
 fi
@@ -60,6 +61,11 @@ fi
 
 if [ "$ACTION" == "$HELP" ]; then
     print_help ""
+fi
+
+if [ "$ACTION" == "$LIST" ]; then
+    find $PATHTO -maxdepth 1 -type d -printf "%f\n" | grep -v '/$'
+    exit $?
 fi
 
 # Make X available
