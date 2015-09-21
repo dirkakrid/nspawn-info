@@ -54,7 +54,7 @@ _nspawn()
         NSPAWN_OPTS=$(nspawn options)
         COMPREPLY=( $(compgen -W "$NSPAWN_OPTS" -- $cur) )
     else
-        FIRST=$(echo $prev | grep 'list\|help\|options\|refresh')
+        FIRST=$(echo $prev | grep 'list\|help\|options\|refresh\|running')
         if [ -z $FIRST ]; then
             NSPAWN_OPTS=$(nspawn list)  
             COMPREPLY=( $(compgen -W "$NSPAWN_OPTS" -- $cur) )
