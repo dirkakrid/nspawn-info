@@ -19,6 +19,8 @@ ACTION=$1
 OBJECT=$2
 SCRIPTLOCATION="{PATH_TO_SCRIPT}nspawn"
 SHARED_LOCATION="{SHARED}"
+SCREEN_START="nspawn-"
+SCREEN_END="-container"
 ALL_OPTS="$INSTALL $CLONE $REMOVE $START $BOOT $UPDATE $PACK $UNPACK $REFRESH $RESUME $OPTIONS $HELP $LIST $RUNNING"
 if [[ "$OBJECT" == */ ]]; then
     OBJECT=${OBJECT::-1}
@@ -55,6 +57,11 @@ function check_not_exists()
     fi
 }
 
+function get_screen_name()
+{
+    echo "$SCREEN_START$1$SCREEN_END"
+}
+
 if [ "$ACTION" == "$OPTIONS" ]; then
     echo $ALL_OPTS
     exit 0
@@ -69,11 +76,6 @@ if [ "$ACTION" == "$LIST" ]; then
     exit $?
 fi
 
-if [ "$ACTION" == "$RUNNING" ]; then
-    machinectl list
-    exit $?
-fi
-
 # Make X available
 xhost +local: > /dev/null 2>&1
 if [ $UID -ne 0 ]; then
@@ -84,6 +86,17 @@ fi
 
 if [ -z "$ACTION" ]; then
     print_help "Action is required!"
+fi
+
+if [ "$ACTION" == "$RUNNING" ]; then
+    echo ""
+    echo "Reporting from machinectl:"
+    machinectl list
+    echo ""
+    echo "Reported from screen:"
+    screen -list | grep "$SCREEN_START*.*$SCREEN_END"
+    echo ""
+    exit $?
 fi
 
 if [ "$ACTION" == "$REFRESH" ]; then
@@ -121,14 +134,17 @@ $REMOVE)
     ;;
 $START)
     check_exists "$OBJPATH"
-    screen -S "$OBJECT" systemd-nspawn -D "$OBJPATH/" -M "$OBJECT" --bind $SHARED_LOCATION "${@:3}"
+    screen_name=$(get_screen_name "$OBJECT")
+    screen -S "$screen_name" systemd-nspawn -D "$OBJPATH/" -M "$OBJECT" --bind $SHARED_LOCATION "${@:3}"
     ;;
 $BOOT)
     check_exists "$OBJPATH"
-    screen -S "$OBJECT" systemd-nspawn -b -D "$OBJPATH/" -M "$OBJECT" --bind $SHARED_LOCATION "${@:3}"
+    screen_name=$(get_screen_name "$OBJECT")
+    screen -S "$screen_name" systemd-nspawn -b -D "$OBJPATH/" -M "$OBJECT" --bind $SHARED_LOCATION "${@:3}"
     ;;
 $RESUME)
-    screen -r "$OBJECT"
+    screen_name=$(get_screen_name "$OBJECT")
+    screen -r "$screen_name"
     ;;
 $UPDATE)
     check_exists "$OBJPATH"
