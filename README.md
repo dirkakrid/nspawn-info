@@ -41,6 +41,20 @@ nspawn boot template
 nspawn clone copy-of-template
 ```
 
+## Bash auto-completion
+* Add the following as a script at "/etc/bash_completion.d/nspawn"
+```text
+#!/bin/bash
+_nspawn()
+{
+    local cur=${COMP_WORDS[COMP_CWORD]}
+    NSPAWN_OPTS=$(nspawn options)
+    COMPREPLY=( $(compgen -W "$NSPAWN_OPTS" -- $cur) )
+}
+complete -F _nspawn nspawn
+```
+
+
 ### Notes
 * Create the 'base' container (template) using these 'basic' steps:
 ```text
