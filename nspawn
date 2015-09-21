@@ -10,23 +10,28 @@ UNPACK="unpack"
 REFRESH="refresh"
 TEMPLATE="template"
 RESUME="resume"
+OPTIONS="options"
+HELP="help"
 PATHTO="{CONTAINERS}"
 ACTION=$1
 OBJECT=$2
 SCRIPTLOCATION="{PATH_TO_SCRIPT}nspawn"
 SHARED_LOCATION="{SHARED}"
-
+ALL_OPTS="$INSTALL $CLONE $REMOVE $START $BOOT $UPDATE $PACK $UNPACK $REFRESH $RESUME $OPTIONS $HELP"
 if [[ "$OBJECT" == */ ]]; then
     OBJECT=${OBJECT::-1}
 fi
 
 function print_help()
 {
-    printf "\nError: %0s\n\n" "$1"
+    if ! [ -z $1 ]; then
+        printf "\nError: %0s\n\n" "$1"
+    fi
+
     printf "Usage: nspawn-wrapper [ACTION] [OBJECT]\n"
     printf "%0s\n" "Provides a simple wrapper around systemd-nspawn"
     printf "\t%0s\t%20s\n" "ACTION" "The action to perform\n"
-    printf "\t\t($INSTALL, $CLONE, $REMOVE, $START, $BOOT, $UPDATE, $PACK, $UNPACK, $REFRESH, $RESUME)\n"
+    printf "\t\t($ALL_OPTS)\n"
     printf "\t%0s\t%20s\n" "OBJECT" "The machine name to interact with"
     printf "\n"
     exit -1
@@ -47,6 +52,15 @@ function check_not_exists()
         exit -1
     fi
 }
+
+if [ "$ACTION" == "$OPTIONS" ]; then
+    echo $ALL_OPTS
+    exit 0
+fi
+
+if [ "$ACTION" == "$HELP" ]; then
+    print_help ""
+fi
 
 # Make X available
 xhost +local: > /dev/null 2>&1
