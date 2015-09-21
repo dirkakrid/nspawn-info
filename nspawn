@@ -14,6 +14,7 @@ OPTIONS="options"
 HELP="help"
 LIST="list"
 RUNNING="running"
+TERMINATE="terminate"
 PATHTO="{CONTAINERS}"
 ACTION=$1
 OBJECT=$2
@@ -21,7 +22,7 @@ SCRIPTLOCATION="{PATH_TO_SCRIPT}nspawn"
 SHARED_LOCATION="{SHARED}"
 SCREEN_START="nspawn-"
 SCREEN_END="-container"
-ALL_OPTS="$INSTALL $CLONE $REMOVE $START $BOOT $UPDATE $PACK $UNPACK $REFRESH $RESUME $OPTIONS $HELP $LIST $RUNNING"
+ALL_OPTS="$INSTALL $CLONE $REMOVE $START $BOOT $UPDATE $PACK $UNPACK $REFRESH $RESUME $OPTIONS $HELP $LIST $RUNNING $TERMINATE"
 if [[ "$OBJECT" == */ ]]; then
     OBJECT=${OBJECT::-1}
 fi
@@ -168,6 +169,9 @@ $UNPACK)
     fi
 
     tar xzvf $TARFILE
+    ;;
+$TERMINATE)
+    machinectl terminate "$OBJECT"
     ;;
 *)
     print_help "Invalid action: $ACTION"
