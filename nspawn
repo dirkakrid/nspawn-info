@@ -11,6 +11,7 @@ REFRESH="refresh"
 TEMPLATE="template"
 RESUME="resume"
 OPTIONS="options"
+OPERATIONS="operations"
 HELP="help"
 LIST="list"
 RUNNING="running"
@@ -22,7 +23,8 @@ SCRIPTLOCATION="{PATH_TO_SCRIPT}nspawn"
 SHARED_LOCATION="{SHARED}"
 SCREEN_START="nspawn-"
 SCREEN_END="-container"
-ALL_OPTS="$INSTALL $CLONE $REMOVE $START $BOOT $UPDATE $PACK $UNPACK $REFRESH $RESUME $OPTIONS $HELP $LIST $RUNNING $TERMINATE"
+NON_OPERS="$LIST $HELP $OPTIONS $REFRESH $RUNNING $OPERATIONS"
+ALL_OPTS="$INSTALL $CLONE $REMOVE $START $BOOT $UPDATE $PACK $UNPACK $RESUME $TERMINATE $NON_OPERS"
 if [[ "$OBJECT" == */ ]]; then
     OBJECT=${OBJECT::-1}
 fi
@@ -63,19 +65,23 @@ function get_screen_name()
     echo "$SCREEN_START$1$SCREEN_END"
 }
 
-if [ "$ACTION" == "$OPTIONS" ]; then
+case $ACTION in
+$OPTIONS)
+    echo $NON_OPERS
+    exit 0
+    ;;
+$HELP)
+    print_help ""
+    ;;
+$OPERATIONS)
     echo $ALL_OPTS
     exit 0
-fi
-
-if [ "$ACTION" == "$HELP" ]; then
-    print_help ""
-fi
-
-if [ "$ACTION" == "$LIST" ]; then
+    ;;
+$LIST)
     find $PATHTO -maxdepth 1 -type d -printf "%f\n" | grep -v '/$'
     exit $?
-fi
+    ;;
+esac
 
 # Make X available
 xhost +local: > /dev/null 2>&1
