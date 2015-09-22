@@ -47,17 +47,22 @@ nspawn clone copy-of-template
 #!/bin/bash
 _nspawn()
 {
-    local cur prev
+    local cur prev opts idx first
     cur=${COMP_WORDS[COMP_CWORD]}
     prev=${COMP_WORDS[COMP_CWORD-1]}
     if [ $COMP_CWORD -eq 1 ]; then
-        NSPAWN_OPTS=$(nspawn options)
-        COMPREPLY=( $(compgen -W "$NSPAWN_OPTS" -- $cur) )
+        opts=$(nspawn operations)
+        COMPREPLY=( $(compgen -W "$opts" -- $cur) )
     else
-        FIRST=$(echo $prev | grep 'list\|help\|options\|refresh\|running')
-        if [ -z $FIRST ]; then
-            NSPAWN_OPTS=$(nspawn list)  
-            COMPREPLY=( $(compgen -W "$NSPAWN_OPTS" -- $cur) )
+    first="false"
+        for idx in $(nspawn options); do
+            if [[ $prev == $idx ]]; then
+                first="true"
+            fi
+        done
+        if [[ $first == "false" ]]; then
+            opts=$(nspawn list) 
+            COMPREPLY=( $(compgen -W "$opts" -- $cur) )
         fi
     fi
 }
