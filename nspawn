@@ -16,6 +16,8 @@ HELP="help"
 LIST="list"
 RUNNING="running"
 TERMINATE="terminate"
+BCKBOOT="background"
+BCKSTART="detached"
 PATHTO="{CONTAINERS}"
 ACTION=$1
 OBJECT=$2
@@ -24,7 +26,7 @@ SHARED_LOCATION="{SHARED}"
 SCREEN_START="nspawn-"
 SCREEN_END="-container"
 NON_OPERS="$LIST $HELP $OPTIONS $REFRESH $RUNNING $OPERATIONS"
-ALL_OPTS="$INSTALL $CLONE $REMOVE $START $BOOT $UPDATE $PACK $UNPACK $RESUME $TERMINATE $NON_OPERS"
+ALL_OPTS="$INSTALL $CLONE $REMOVE $START $BOOT $UPDATE $PACK $UNPACK $RESUME $TERMINATE $BCKBOOT $BCKSTART $NON_OPERS"
 if [[ "$OBJECT" == */ ]]; then
     OBJECT=${OBJECT::-1}
 fi
@@ -139,15 +141,20 @@ $REMOVE)
     check_exists "$OBJPATH"
     rm -r $OBJPATH
     ;;
-$START)
+$START | $BOOT | $BCKBOOT | $BCKSTART)
     check_exists "$OBJPATH"
+    screen_args=""
+    nspawn_args=""
+    if [[ $ACTION == $BCKBOOT ]] || [[ $ACTION == $BOOT ]]; then
+        nspawn_args="-b"
+    fi
+
+    if [[ $ACTION == $BCKBOOT ]] || [[ $ACTION == $BCKSTART ]]; then
+        screen_args="-d -m"
+    fi
+    
     screen_name=$(get_screen_name "$OBJECT")
-    screen -S "$screen_name" systemd-nspawn -D "$OBJPATH/" -M "$OBJECT" --bind $SHARED_LOCATION "${@:3}"
-    ;;
-$BOOT)
-    check_exists "$OBJPATH"
-    screen_name=$(get_screen_name "$OBJECT")
-    screen -S "$screen_name" systemd-nspawn -b -D "$OBJPATH/" -M "$OBJECT" --bind $SHARED_LOCATION "${@:3}"
+    screen $screen_args -S "$screen_name" systemd-nspawn $nspawn_args -D "$OBJPATH/" -M "$OBJECT" --bind $SHARED_LOCATION "${@:3}"
     ;;
 $RESUME)
     screen_name=$(get_screen_name "$OBJECT")
