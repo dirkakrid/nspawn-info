@@ -24,6 +24,7 @@ ACTION=$1
 OBJECT=$2
 SCRIPTLOCATION="{PATH_TO_SCRIPT}nspawn"
 SHARED_LOCATION="{SHARED}"
+ENABLE_X=1
 SCREEN_START="nspawn-"
 SCREEN_END="-container"
 NON_OPERS="$LIST $HELP $OPTIONS $REFRESH $RUNNING $OPERATIONS"
@@ -87,7 +88,10 @@ $LIST)
 esac
 
 # Make X available
-xhost +local: > /dev/null 2>&1
+if [ $ENABLE_X -eq 1 ]; then
+    xhost +local: > /dev/null 2>&1
+fi
+
 if [ $UID -ne 0 ]; then
     printf "\nRestarting script using sudo\n"
     sudo $SCRIPTLOCATION $@

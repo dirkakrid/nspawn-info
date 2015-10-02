@@ -112,7 +112,7 @@ zypper --root /absolute/path/to/template/ in patterns-openSUSE-64bit patterns-op
 | repo-update         | http://download.opensuse.org/update/13.2/                     |
 | repo-update-non-oss | http://download.opensuse.org/update/13.2-non-oss/             |
 
-* Share X with the container via this:
+* Share X with the container via this (in the nspawn script, disable sharing X from the host by changing ENABLE_X to != 1):
 ```text
 # host
 xhost +local: > /dev/null 2>&1
