@@ -41,6 +41,17 @@ nspawn boot template
 nspawn clone copy-of-template
 ```
 
+## Setup/install
+* Run a script (sort of like this) and it should be all set
+```text
+NSPAWN_FILE="/path/to/output/file/for/nspawn
+NSPAWN_URL="https://raw.githubusercontent.com/enckse/nspawn-info/master/nspawn"
+CONTAINERS="\/path\/to\/containers\/"
+SHARED="\/path\/to\/shared"
+PATHTO="\/path\/to\/directory\/"
+wget -qO- $NSPAWN_URL | sed -e "s/{CONTAINERS}/$CONTAINERS/g" | sed -e "s/{PATH_TO_SCRIPT}/$PATHTO/g" | sed -e "s/{SHARED}/$SHARED/g" > $NSPAWN_FILE
+```
+
 ## Bash auto-completion
 * Add the following as a script at "/etc/bash_completion.d/nspawn"
 ```text
