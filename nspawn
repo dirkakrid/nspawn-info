@@ -73,7 +73,7 @@ $OPERATIONS)
     exit 0
     ;;
 $LIST)
-    find $PATHTO -maxdepth 1 -type d -printf "%f\n" | grep -v '/$'
+    find $PATHTO/ -maxdepth 1 -type d -printf "%f\n" | grep -v '/$'
     exit $?
     ;;
 esac
@@ -118,13 +118,17 @@ $REMOVE)
     rm -rf $OBJPATH
     ;;
 $START | $BOOT | $BCKBOOT | $BCKSTART)
-    mkdir -p $OBJPATH
-    mkdir -p $OBJPATH/$OVERLAY_OS
-    mkdir -p $OBJPATH/$OVERLAY_FILES
-    mkdir -p $OBJPATH/$OVERLAY_WORKING
-    mount | grep -q "$OBJPATH/$OVERLAY_FILES"
-    if [ $? -ne 0 ]; then
-        mount -t overlay -o lowerdir=$PATHTO/$TEMPLATE,upperdir=$OBJPATH/$OVERLAY_OS,workdir=$OBJPATH/$OVERLAY_WORKING overlay $OBJPATH/$OVERLAY_FILES/
+    BOOT_OS_PATH=$OBJPATH
+    if [[ $OBJECT != "$TEMPLATE" ]]; then
+        BOOT_OS_PATH="$OBJPATH/$OVERLAY_FILES"
+        mkdir -p $OBJPATH
+        mkdir -p $OBJPATH/$OVERLAY_OS
+        mkdir -p $BOOT_OS_PATH
+        mkdir -p $OBJPATH/$OVERLAY_WORKING
+        mount | grep -q "$OBJPATH/$OVERLAY_FILES"
+        if [ $? -ne 0 ]; then
+            mount -t overlay -o lowerdir=$PATHTO/$TEMPLATE,upperdir=$OBJPATH/$OVERLAY_OS,workdir=$OBJPATH/$OVERLAY_WORKING overlay $BOOT_OS_PATH/
+        fi
     fi
     
     screen_args=""
@@ -138,7 +142,7 @@ $START | $BOOT | $BCKBOOT | $BCKSTART)
     fi
     
     screen_name=$(get_screen_name "$OBJECT")
-    screen $screen_args -S "$screen_name" systemd-nspawn $nspawn_args -D "$OBJPATH/$OVERLAY_FILES/" -M "$OBJECT" --bind $SHARED_LOCATION "${@:3}"
+    screen $screen_args -S "$screen_name" systemd-nspawn $nspawn_args -D "$BOOT_OS_PATH/" -M "$OBJECT" --bind $SHARED_LOCATION "${@:3}"
     ;;
 $RESUME)
     screen_name=$(get_screen_name "$OBJECT")
