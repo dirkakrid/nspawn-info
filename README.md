@@ -14,7 +14,7 @@ script provides the general structure of performing the following and is reasona
 ### Setup/install
 * Run a script (sort of like this) and it should be all set
 ```text
-NSPAWN_FILE="/path/to/output/file/for/nspawn
+NSPAWN_FILE="/path/to/output/file/for/nspawn"
 NSPAWN_URL="https://raw.githubusercontent.com/enckse/nspawn-info/master/nspawn"
 CONTAINERS="\/path\/to\/containers\/"
 SHARED="\/path\/to\/shared"
