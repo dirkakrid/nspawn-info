@@ -1,13 +1,7 @@
 #!/bin/bash
-INSTALL="install"
-CLONE="clone"
 REMOVE="remove"
 START="start"
 BOOT="boot"
-UPDATE="update"
-PACK="pack"
-UNPACK="unpack"
-REFRESH="refresh"
 TEMPLATE="template"
 RESUME="resume"
 OPTIONS="options"
@@ -18,17 +12,20 @@ RUNNING="running"
 TERMINATE="terminate"
 BCKBOOT="background"
 BCKSTART="detached"
-COPY="copy"
+DISCONNECT="disconnect"
 PATHTO="{CONTAINERS}"
 ACTION=$1
 OBJECT=$2
 SCRIPTLOCATION="{PATH_TO_SCRIPT}nspawn"
 SHARED_LOCATION="{SHARED}"
 ENABLE_X=1
+OVERLAY_OS="os"
+OVERLAY_WORKING="wd"
+OVERLAY_FILES="fs"
 SCREEN_START="nspawn-"
 SCREEN_END="-container"
-NON_OPERS="$LIST $HELP $OPTIONS $REFRESH $RUNNING $OPERATIONS"
-ALL_OPTS="$INSTALL $CLONE $REMOVE $START $BOOT $UPDATE $PACK $UNPACK $RESUME $TERMINATE $BCKBOOT $BCKSTART $NON_OPERS $COPY"
+NON_OPERS="$LIST $HELP $OPTIONS $RUNNING $OPERATIONS"
+ALL_OPTS="$REMOVE $START $BOOT $RESUME $TERMINATE $BCKBOOT $BCKSTART $DISCONNECT $NON_OPERS"
 if [[ "$OBJECT" == */ ]]; then
     OBJECT=${OBJECT::-1}
 fi
@@ -48,20 +45,14 @@ function print_help()
     exit -1
 }
 
-function check_exists()
+function do_umount()
 {
     if [ ! -d "$1" ]; then
         echo "Object does not exist"
         exit -1
     fi
-}
 
-function check_not_exists()
-{
-    if [ -d "$1" ]; then
-        echo "Object $1 already exists"
-        exit -1
-    fi
+    umount $1/$OVERLAY_FILES
 }
 
 function get_screen_name()
@@ -113,47 +104,29 @@ if [ "$ACTION" == "$RUNNING" ]; then
     exit $?
 fi
 
-if [ "$ACTION" == "$REFRESH" ]; then
-    echo "Refreshing all"
-    EXIT_CODES=0
-    ALL_ITEMS=$(ls $PATHTO)
-    for i in ${ALL_ITEMS[*]}; do
-        echo -e "\033[0;31m$i\033[0m"
-        $SCRIPTLOCATION $UPDATE $i
-        if [ $? -ne 0 ]; then
-            EXIT_CODES=-1
-        fi
-    done
-    exit $EXIT_CODES
-fi
-
 if [ -z "$OBJECT" ]; then
     print_help "Object is required!"
 fi
 
 OBJPATH=$PATHTO/$OBJECT
-TARFILE="$OBJECT.tar.gz"
 case $ACTION in
-$CLONE)
-    check_not_exists "$OBJPATH"
-    cp -R "$PATHTO/$TEMPLATE" $OBJPATH
-    ;;
-$COPY)
-    check_exists "$OBJPATH"
-    COPY_TO_OBJ=$PATHTO/$3
-    check_not_exists "$COPY_TO_OBJ"
-    cp -R "$OBJPATH" "$COPY_TO_OBJ"
-    ;;
-$INSTALL)
-    check_exists "$OBJPATH"
-    zypper --root $OBJPATH in "${@:3}"
+$DISCONNECT)
+    do_umount $OBJPATH
     ;;
 $REMOVE)
-    check_exists "$OBJPATH"
-    rm -r $OBJPATH
+    do_umount $OBJPATH
+    rm -rf $OBJPATH
     ;;
 $START | $BOOT | $BCKBOOT | $BCKSTART)
-    check_exists "$OBJPATH"
+    mkdir -p $OBJPATH
+    mkdir -p $OBJPATH/$OVERLAY_OS
+    mkdir -p $OBJPATH/$OVERLAY_FILES
+    mkdir -p $OBJPATH/$OVERLAY_WORKING
+    mount | grep -q "$OBJPATH/$OVERLAY_FILES"
+    if [ $? -ne 0 ]; then
+        mount -t overlay -o lowerdir=$PATHTO/$TEMPLATE,upperdir=$OBJPATH/$OVERLAY_OS,workdir=$OBJPATH/$OVERLAY_WORKING overlay $OBJPATH/$OVERLAY_FILES/
+    fi
+    
     screen_args=""
     nspawn_args=""
     if [[ $ACTION == $BCKBOOT ]] || [[ $ACTION == $BOOT ]]; then
@@ -165,39 +138,18 @@ $START | $BOOT | $BCKBOOT | $BCKSTART)
     fi
     
     screen_name=$(get_screen_name "$OBJECT")
-    screen $screen_args -S "$screen_name" systemd-nspawn $nspawn_args -D "$OBJPATH/" -M "$OBJECT" --bind $SHARED_LOCATION "${@:3}"
+    screen $screen_args -S "$screen_name" systemd-nspawn $nspawn_args -D "$OBJPATH/$OVERLAY_FILES/" -M "$OBJECT" --bind $SHARED_LOCATION "${@:3}"
     ;;
 $RESUME)
     screen_name=$(get_screen_name "$OBJECT")
     screen -r "$screen_name"
     ;;
-$UPDATE)
-    check_exists "$OBJPATH"
-    zypper --root $OBJPATH ref
-    zypper --root $OBJPATH up
-    ;;
-$PACK)
-    check_exists "$OBJPATH"
-    if [ -e $TARFILE ]; then
-        echo "File $TARFILE already exists"
-        exit -1
-    fi
-
-    tar -cvpzf $TARFILE --one-file-system "$OBJPATH/"
-    ;;
-$UNPACK)
-    check_not_exists "$OBJPATH"
-    if [ ! -e $TARFILE ]; then
-        echo "No tar file found: $TARFILE"
-        exit -1
-    fi
-
-    tar xzvf $TARFILE
-    ;;
 $TERMINATE)
     machinectl terminate "$OBJECT"
+    do_umount $OBJPATH
     ;;
 *)
     print_help "Invalid action: $ACTION"
     ;;
 esac
+
