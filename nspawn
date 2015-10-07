@@ -19,6 +19,7 @@ OBJECT=$2
 SCRIPTLOCATION="{PATH_TO_SCRIPT}nspawn"
 SHARED_LOCATION="{SHARED}"
 ENABLE_X=1
+ENABLE_SCREEN=1
 OVERLAY_OS="os"
 OVERLAY_WORKING="wd"
 OVERLAY_FILES="fs"
@@ -142,7 +143,11 @@ $START | $BOOT | $BCKBOOT | $BCKSTART)
     fi
     
     screen_name=$(get_screen_name "$OBJECT")
-    screen $screen_args -S "$screen_name" systemd-nspawn $nspawn_args -D "$BOOT_OS_PATH/" -M "$OBJECT" --bind $SHARED_LOCATION "${@:3}"
+    CMD_TXT="systemd-nspawn $nspawn_args -D \"$BOOT_OS_PATH/\" -M \"$OBJECT\" --bind $SHARED_LOCATION ${@:3}"
+    if [ $ENABLE_SCREEN -eq 1 ]; then
+        CMD_TXT="screen $screen_args -S \"$screen_name\" $CMD_TXT"
+    fi
+    eval $CMD_TXT
     ;;
 $RESUME)
     screen_name=$(get_screen_name "$OBJECT")
