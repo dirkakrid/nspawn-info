@@ -66,6 +66,9 @@ xhost +local: > /dev/null 2>&1
 export DISPLAY=:0
 ```
 
+### Screen
+* Machines are spawned via screen but that can be disabled by setting ENABLE_SCREEN != 1
+
 ### Using debootstrap
 * Booting debian in another distro
 ```text
