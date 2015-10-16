@@ -25,7 +25,7 @@ wget -qO- $NSPAWN_URL | sed -e "s/{CONTAINERS}/$CONTAINERS/g" | sed -e "s/{PATH_
 ### Packing a template
 * Pack a template using tar/gz
 ```text
-tar -cvpzf $TARFILE --one-file-system "$OBJPATH/"
+tar -cvpzf $TARFILE --one-file-system "contaner-directory/"
 ```
 
 ### Bash auto-completion
