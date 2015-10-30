@@ -13,6 +13,7 @@ TERMINATE="terminate"
 BCKBOOT="background"
 BCKSTART="detached"
 DISCONNECT="disconnect"
+PACK="pack"
 PATHTO="{CONTAINERS}"
 ACTION=$1
 OBJECT=$2
@@ -26,7 +27,7 @@ OVERLAY_FILES="fs"
 SCREEN_START="nspawn-"
 SCREEN_END="-container"
 NON_OPERS="$LIST $HELP $OPTIONS $RUNNING $OPERATIONS"
-ALL_OPTS="$REMOVE $START $BOOT $RESUME $TERMINATE $BCKBOOT $BCKSTART $DISCONNECT $NON_OPERS"
+ALL_OPTS="$REMOVE $START $BOOT $RESUME $TERMINATE $BCKBOOT $BCKSTART $DISCONNECT $PACK $NON_OPERS"
 if [[ "$OBJECT" == */ ]]; then
     OBJECT=${OBJECT::-1}
 fi
@@ -151,6 +152,12 @@ $START | $BOOT | $BCKBOOT | $BCKSTART)
         CMD_TXT="screen $screen_args -S \"$screen_name\" $CMD_TXT"
     fi
     eval $CMD_TXT
+    ;;
+$PACK)
+    CURRENT_PWD=$PWD
+    cd $PATHTO
+    tar -cvpzf $CURRENT_PWD/nspawn-$OBJECT.tar.gz --one-file-system "$OBJECT/"
+    cd $CURRENT_PWD
     ;;
 $RESUME)
     screen_name=$(get_screen_name "$OBJECT")

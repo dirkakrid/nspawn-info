@@ -22,12 +22,6 @@ PATHTO="\/path\/to\/directory\/"
 wget -qO- $NSPAWN_URL | sed -e "s/{CONTAINERS}/$CONTAINERS/g" | sed -e "s/{PATH_TO_SCRIPT}/$PATHTO/g" | sed -e "s/{SHARED}/$SHARED/g" > $NSPAWN_FILE
 ```
 
-### Packing a template
-* Pack a template using tar/gz
-```text
-tar -cvpzf $TARFILE --one-file-system "contaner-directory/"
-```
-
 ### Bash auto-completion
 * Add the following as a script at "/etc/bash_completion.d/nspawn"
 ```text
