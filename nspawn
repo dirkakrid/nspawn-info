@@ -111,12 +111,15 @@ fi
 
 OBJPATH=$PATHTO/$OBJECT
 case $ACTION in
-$DISCONNECT)
+$DISCONNECT | $REMOVE | $TERMINATE)
+    if [[ $ACTION == $TERMINATE ]]; then
+        machinectl terminate "$OBJECT"
+    fi
+
     do_umount $OBJPATH
-    ;;
-$REMOVE)
-    do_umount $OBJPATH
-    rm -rf $OBJPATH
+    if [[ $ACTION == $REMOVE ]]; then
+        rm -rf $OBJPATH
+    fi
     ;;
 $START | $BOOT | $BCKBOOT | $BCKSTART)
     BOOT_OS_PATH=$OBJPATH
@@ -152,10 +155,6 @@ $START | $BOOT | $BCKBOOT | $BCKSTART)
 $RESUME)
     screen_name=$(get_screen_name "$OBJECT")
     screen -r "$screen_name"
-    ;;
-$TERMINATE)
-    machinectl terminate "$OBJECT"
-    do_umount $OBJPATH
     ;;
 *)
     print_help "Invalid action: $ACTION"
