@@ -34,7 +34,8 @@ fi
 
 function print_help()
 {
-    if ! [ -z $1 ]; then
+    ERR=$(echo $1 | cut -d " " -f 1)
+    if ! [ -z $ERR ]; then
         printf "\nError: %0s\n\n" "$1"
     fi
 
@@ -85,14 +86,14 @@ if [ $ENABLE_X -eq 1 ]; then
     xhost +local: > /dev/null 2>&1
 fi
 
+if [ -z "$ACTION" ]; then
+    print_help "Action is required!"
+fi
+
 if [ $UID -ne 0 ]; then
     printf "\nRestarting script using sudo\n"
     sudo $SCRIPTLOCATION $@
     exit $?
-fi
-
-if [ -z "$ACTION" ]; then
-    print_help "Action is required!"
 fi
 
 if [ "$ACTION" == "$RUNNING" ]; then
