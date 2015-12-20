@@ -28,7 +28,11 @@ OVERLAY_FILES="fs"
 SCREEN_START="nspawn-"
 SCREEN_END="-container"
 NON_OPERS="$LIST $HELP $OPTIONS $RUNNING $OPERATIONS"
-ALL_OPTS="$REMOVE $START $BOOT $RESUME $TERMINATE $BCKBOOT $BCKSTART $DISCONNECT $PACK $NON_OPERS"
+ALL_OPTS="$REMOVE $START $BOOT $RESUME $TERMINATE $BCKBOOT $BCKSTART $PACK $NON_OPERS"
+if [ $ENABLE_OVERLAY -eq 1 ]; then
+    ALL_OPTS=$ALL_OPTS" $DISCONNECT"
+fi
+
 if [[ "$OBJECT" == */ ]]; then
     OBJECT=${OBJECT::-1}
 fi
@@ -42,7 +46,7 @@ function print_help()
 
     printf "Usage: nspawn-wrapper [ACTION] [OBJECT]\n"
     printf "%0s\n" "Provides a simple wrapper around systemd-nspawn"
-    printf "\t%0s\t%20s\n" "ACTION" "The action to perform\n"
+    printf "\t%0s\t%20s\n" "ACTION" "The action to perform"
     printf "\t\t($ALL_OPTS)\n"
     printf "\t%0s\t%20s\n" "OBJECT" "The machine name to interact with"
     printf "\n"
