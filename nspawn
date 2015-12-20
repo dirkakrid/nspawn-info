@@ -119,7 +119,7 @@ $DISCONNECT | $REMOVE | $TERMINATE)
         machinectl terminate "$OBJECT"
     fi
 
-    if [ $ENABLE_OVERALY -eq 1 ]; then
+    if [ $ENABLE_OVERLAY -eq 1 ]; then
         do_umount $OBJPATH
     fi
     
