@@ -21,6 +21,7 @@ SCRIPTLOCATION="{PATH_TO_SCRIPT}nspawn"
 SHARED_LOCATION="{SHARED}"
 ENABLE_X=1
 ENABLE_SCREEN=1
+ENABLE_OVERLAY=0
 OVERLAY_OS="os"
 OVERLAY_WORKING="wd"
 OVERLAY_FILES="fs"
@@ -118,7 +119,10 @@ $DISCONNECT | $REMOVE | $TERMINATE)
         machinectl terminate "$OBJECT"
     fi
 
-    do_umount $OBJPATH
+    if [ $ENABLE_OVERALY -eq 1 ]; then
+        do_umount $OBJPATH
+    fi
+    
     if [[ $ACTION == $REMOVE ]]; then
         rm -rf $OBJPATH
     fi
@@ -126,14 +130,20 @@ $DISCONNECT | $REMOVE | $TERMINATE)
 $START | $BOOT | $BCKBOOT | $BCKSTART)
     BOOT_OS_PATH=$OBJPATH
     if [[ $OBJECT != "$TEMPLATE" ]]; then
-        BOOT_OS_PATH="$OBJPATH/$OVERLAY_FILES"
-        mkdir -p $OBJPATH
-        mkdir -p $OBJPATH/$OVERLAY_OS
-        mkdir -p $BOOT_OS_PATH
-        mkdir -p $OBJPATH/$OVERLAY_WORKING
-        mount | grep -q "$OBJPATH/$OVERLAY_FILES"
-        if [ $? -ne 0 ]; then
-            mount -t overlay -o lowerdir=$PATHTO/$TEMPLATE,upperdir=$OBJPATH/$OVERLAY_OS,workdir=$OBJPATH/$OVERLAY_WORKING overlay $BOOT_OS_PATH/
+        if [ $ENABLE_OVERLAY -eq 1 ]; then
+            BOOT_OS_PATH="$OBJPATH/$OVERLAY_FILES"
+            mkdir -p $OBJPATH
+            mkdir -p $OBJPATH/$OVERLAY_OS
+            mkdir -p $BOOT_OS_PATH
+            mkdir -p $OBJPATH/$OVERLAY_WORKING
+            mount | grep -q "$OBJPATH/$OVERLAY_FILES"
+            if [ $? -ne 0 ]; then
+                mount -t overlay -o lowerdir=$PATHTO/$TEMPLATE,upperdir=$OBJPATH/$OVERLAY_OS,workdir=$OBJPATH/$OVERLAY_WORKING overlay $BOOT_OS_PATH/
+            fi
+        else
+            if [ ! -d $BOOT_OS_PATH ]; then
+                cp -R $PATHTO/$TEMPLATE $BOOT_OS_PATH
+            fi
         fi
     fi
     
