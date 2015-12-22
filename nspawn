@@ -87,7 +87,9 @@ $LIST)
     exit $?
     ;;
 $VERSION)
-    echo "$SCRIPT_VERSION"
+    echo "Script Version: $SCRIPT_VERSION"
+    echo "systemd-nspawn version:"
+    systemd-nspawn --version
     exit 0
     ;;
 esac
