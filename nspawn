@@ -14,6 +14,7 @@ BCKBOOT="background"
 BCKSTART="detached"
 DISCONNECT="disconnect"
 PACK="pack"
+VERSION="version"
 PATHTO="{CONTAINERS}"
 ACTION=$1
 OBJECT=$2
@@ -25,9 +26,10 @@ ENABLE_OVERLAY=0
 OVERLAY_OS="os"
 OVERLAY_WORKING="wd"
 OVERLAY_FILES="fs"
+SCRIPT_VERSION="1.0.0"
 SCREEN_START="nspawn-"
 SCREEN_END="-container"
-NON_OPERS="$LIST $HELP $OPTIONS $RUNNING $OPERATIONS"
+NON_OPERS="$LIST $HELP $OPTIONS $RUNNING $OPERATIONS $VERSION"
 ALL_OPTS="$REMOVE $START $BOOT $RESUME $TERMINATE $BCKBOOT $BCKSTART $PACK $NON_OPERS"
 if [ $ENABLE_OVERLAY -eq 1 ]; then
     ALL_OPTS=$ALL_OPTS" $DISCONNECT"
@@ -83,6 +85,10 @@ $OPERATIONS)
 $LIST)
     find $PATHTO/ -maxdepth 1 -type d -printf "%f\n" | grep -v '/$'
     exit $?
+    ;;
+$VERSION)
+    echo "$SCRIPT_VERSION"
+    exit 0
     ;;
 esac
 
