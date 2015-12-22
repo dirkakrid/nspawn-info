@@ -146,6 +146,7 @@ $START | $BOOT | $BCKBOOT | $BCKSTART)
             fi
         else
             if [ ! -d $BOOT_OS_PATH ]; then
+                echo "Setting up $OBJECT for first-time use (this may take a moment)..."
                 cp -R $PATHTO/$TEMPLATE $BOOT_OS_PATH
             fi
         fi
