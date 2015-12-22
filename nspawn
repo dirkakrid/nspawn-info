@@ -29,6 +29,9 @@ OVERLAY_FILES="fs"
 SCRIPT_VERSION="1.0.0"
 SCREEN_START="nspawn-"
 SCREEN_END="-container"
+CONFIG_FILE="$HOME/.config/nspawn-info"
+OVERLAY_SETTING="overlay"
+ADDED_ARGS_SETTING="arguments"
 NON_OPERS="$LIST $HELP $OPTIONS $RUNNING $OPERATIONS $VERSION"
 ALL_OPTS="$REMOVE $START $BOOT $RESUME $TERMINATE $BCKBOOT $BCKSTART $PACK $NON_OPERS"
 if [ $ENABLE_OVERLAY -eq 1 ]; then
@@ -53,6 +56,19 @@ function print_help()
     printf "\t%0s\t%20s\n" "OBJECT" "The machine name to interact with"
     printf "\n"
     exit -1
+}
+
+function get-config-value()
+{
+    RESULT=""
+    if [ -e $CONFIG_FILE ]; then
+        RESULT=$(cat $CONFIG_FILE | sed -n -e "s/\[$1\]\.$2=//p")
+    fi
+    if [ -z "$RESULT" ]; then
+        RESULT="$3"
+    fi
+
+    echo $RESULT
 }
 
 function do_umount()
@@ -124,6 +140,11 @@ if [ -z "$OBJECT" ]; then
     print_help "Object is required!"
 fi
 
+ADDED_ARGS=$(get-config-value "$OBJECT" "$ADDED_ARGS_SETTING" "")
+if [[ $OBJECT != "$TEMPLATE" ]]; then
+    ENABLE_OVERLAY=$(get-config-value "$OBJECT" "$OVERLAY_SETTING" "$ENABLE_OVERLAY")
+fi
+
 OBJPATH=$PATHTO/$OBJECT
 case $ACTION in
 $DISCONNECT | $REMOVE | $TERMINATE)
@@ -171,7 +192,7 @@ $START | $BOOT | $BCKBOOT | $BCKSTART)
     fi
     
     screen_name=$(get_screen_name "$OBJECT")
-    CMD_TXT="systemd-nspawn $nspawn_args -D \"$BOOT_OS_PATH/\" -M \"$OBJECT\" --bind $SHARED_LOCATION ${@:3}"
+    CMD_TXT="systemd-nspawn $nspawn_args -D \"$BOOT_OS_PATH/\" -M \"$OBJECT\" --bind $ADDED_ARGS $SHARED_LOCATION ${@:3}"
     if [ $ENABLE_SCREEN -eq 1 ]; then
         CMD_TXT="screen $screen_args -S \"$screen_name\" $CMD_TXT"
     fi
