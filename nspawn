@@ -194,7 +194,7 @@ $START | $BOOT | $BCKBOOT | $BCKSTART)
     fi
     
     screen_name=$(get_screen_name "$OBJECT")
-    CMD_TXT="systemd-nspawn $nspawn_args -D \"$BOOT_OS_PATH/\" -M \"$OBJECT\" --bind $ADDED_ARGS $SHARED_LOCATION ${@:3}"
+    CMD_TXT="systemd-nspawn $nspawn_args -D \"$BOOT_OS_PATH/\" -M \"$OBJECT\" --bind $SHARED_LOCATION $ADDED_ARGS ${@:3}"
     if [ $ENABLE_SCREEN -eq 1 ]; then
         CMD_TXT="screen $screen_args -S \"$screen_name\" $CMD_TXT"
     fi
