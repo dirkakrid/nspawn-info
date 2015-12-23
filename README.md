@@ -70,6 +70,14 @@ export DISPLAY=:0
 debootstrap --arch=amd64 unstable debian/
 ```
 
+### Config file
+* Storing a config file in $HOME/.config/nspawn-info can provide some overrides
+```
+[machine_name].overlay=1
+[machine_name].arguments="--bind /var/log"
+```
+Currently overlay will allow for disabling/enabling overlay fs for a specific machine and override the ENABLE_OVERLAY flag. The 'arguments' setting will be passed to systemd-nspawn as additional arguments at boot
+
 ### Useful references:
 [1] https://wiki.archlinux.org/index.php/Systemd-nspawn
 
