@@ -29,7 +29,9 @@ OVERLAY_FILES="fs"
 SCRIPT_VERSION="1.1.0"
 SCREEN_START="nspawn-"
 SCREEN_END="-container"
-CONFIG_FILE_OFFSET="/.config/nspawn-info"
+CONFIG_FILE_NAME=".nspawn-info"
+CONFIG_FILE_OFFSET="/.config/$CONFIG_FILE_NAME"
+CONTAINER_CONFIG="$PATHTO/$CONFIG_FILE_NAME"
 OVERLAY_SETTING="overlay"
 ADDED_ARGS_SETTING="arguments"
 NON_OPERS="$LIST $HELP $OPTIONS $RUNNING $OPERATIONS $VERSION"
@@ -60,13 +62,24 @@ function print_help()
 
 function get-config-value()
 {
-    RESULT=""
     CONFIG_FILE=$1$CONFIG_FILE_OFFSET
-    if [ -e $CONFIG_FILE ]; then
-        RESULT=$(cat $CONFIG_FILE | sed -n -e "s/\[$2\]\.$3=//p")
+    RESULT=$(get-config-entry $CONFIG_FILE $2 $3)
+    if [ -z "$RESULT" ]; then
+        RESULT=$(get-config-entry $CONTAINER_CONFIG $2 $3)
     fi
     if [ -z "$RESULT" ]; then
         RESULT="$4"
+    fi
+
+    echo $RESULT
+}
+
+function get-config-entry()
+{
+    RESULT=""
+    CONFIG_FILE=$1
+    if [ -e $CONFIG_FILE ]; then
+        RESULT=$(cat $CONFIG_FILE | sed -n -e "s/\[$2\]\.$3=//p")
     fi
 
     echo $RESULT

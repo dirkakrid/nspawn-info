@@ -71,7 +71,7 @@ debootstrap --arch=amd64 unstable debian/
 ```
 
 ### Config file
-* Storing a config file in $HOME/.config/nspawn-info can provide some overrides
+* Storing a config file in $HOME/.config/.nspawn-info can provide some overrides for the user while providing a .nspawn-info in the container directory will be system-wide (but overriden by any user settings)
 ```
 [machine_name].overlay=1
 [machine_name].arguments="--bind /var/log"
