@@ -1,4 +1,6 @@
 #!/bin/bash
+
+# Keywords
 REMOVE="remove"
 START="start"
 BOOT="boot"
@@ -15,7 +17,10 @@ BCKSTART="detached"
 DISCONNECT="disconnect"
 PACK="pack"
 VERSION="version"
+
 PATHTO="{CONTAINERS}"
+
+# per instance inputs
 ACTION=$1
 OBJECT=$2
 SCRIPTLOCATION="$( cd "$(dirname "$0")" ; pwd -P )"/nspawn
@@ -23,17 +28,25 @@ SHARED_LOCATION="{SHARED}"
 ENABLE_X=1
 ENABLE_SCREEN=1
 ENABLE_OVERLAY=0
+
+# overlayfs settings
 OVERLAY_OS="os"
 OVERLAY_WORKING="wd"
 OVERLAY_FILES="fs"
-SCRIPT_VERSION="1.1.0"
+
+# Screen naming/settings
 SCREEN_START="nspawn-"
 SCREEN_END="-container"
+
+# Config file
 CONFIG_FILE_NAME=".nspawn-info"
 CONFIG_FILE_OFFSET="/.config/$CONFIG_FILE_NAME"
 CONTAINER_CONFIG="$PATHTO/$CONFIG_FILE_NAME"
 OVERLAY_SETTING="overlay"
 ADDED_ARGS_SETTING="arguments"
+
+# Help/command aggregates
+SCRIPT_VERSION="1.1.0"
 NON_OPERS="$LIST $HELP $OPTIONS $RUNNING $OPERATIONS $VERSION"
 ALL_OPTS="$REMOVE $START $BOOT $RESUME $TERMINATE $BCKBOOT $BCKSTART $PACK $NON_OPERS"
 if [ $ENABLE_OVERLAY -eq 1 ]; then
