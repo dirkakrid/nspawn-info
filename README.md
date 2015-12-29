@@ -8,7 +8,6 @@ script provides the general structure of performing the following and is reasona
 | Name             | URI                                                     |
 |------------------|---------------------------------------------------------|
 | {CONTAINERS}     | The path where containers should be stored              |
-| {PATH_TO_SCRIPT} | Path where the nspawn script is stored (directory only) |
 | {SHARED}         | A path to share with the containers                     |
 
 ### Setup/install
@@ -18,8 +17,7 @@ NSPAWN_FILE="/path/to/output/file/for/nspawn"
 NSPAWN_URL="https://raw.githubusercontent.com/enckse/nspawn-info/master/nspawn"
 CONTAINERS="\/path\/to\/containers\/"
 SHARED="\/path\/to\/shared"
-PATHTO="\/path\/to\/directory\/"
-wget -qO- $NSPAWN_URL | sed -e "s/{CONTAINERS}/$CONTAINERS/g" | sed -e "s/{PATH_TO_SCRIPT}/$PATHTO/g" | sed -e "s/{SHARED}/$SHARED/g" > $NSPAWN_FILE
+wget -qO- $NSPAWN_URL | sed -e "s/{CONTAINERS}/$CONTAINERS/g" | sed -e "s/{SHARED}/$SHARED/g" > $NSPAWN_FILE
 ```
 
 ### Bash auto-completion
