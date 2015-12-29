@@ -4,7 +4,6 @@
 REMOVE="remove"
 START="start"
 BOOT="boot"
-TEMPLATE="template"
 RESUME="resume"
 OPTIONS="options"
 OPERATIONS="operations"
@@ -60,16 +59,27 @@ ENV_CONTAINER_VALUE="${NSPAWN_ENV_PREFIX}CONTAINERS"
 ENV_XHOST_VALUE="${NSPAWN_ENV_PREFIX}XHOST"
 ENV_SCREEN_VALUE="${NSPAWN_ENV_PREFIX}SCREEN"
 ENV_OVERLAY_VALUE="${NSPAWN_ENV_PREFIX}OVERLAY"
+ENV_TEMPLATE_VALUE="${NSPAWN_ENV_PREFIX}TEMPLATE"
 SCRIPT_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
 SCRIPTLOCATION=$SCRIPT_PATH/nspawn
 SHARED_LOCATION=$(get-environment-setting "$ENV_SHARED_VALUE")
 PATHTO=$(get-environment-setting "$ENV_CONTAINER_VALUE" "$SCRIPT_PATH/containers")
 ENABLE_X=$(get-environment-setting "$ENV_XHOST_VALUE" 1)
-ENABLE_SCREEN=$(get-environment-setting "$ENV_SCREEN_VALUE" 1)
+ENABLE_SCREEN=$(get-environment-setting "$ENV_SCREEN_VALUE" 0)
 ENABLE_OVERLAY=$(get-environment-setting "$ENV_OVERLAY_VALUE" 0)
+TEMPLATE=$(get-environment-setting "$ENV_TEMPLATE_VALUE" "template")
 
 if [ ! -z $SHARED_LOCATION ]; then
+    if [ ! -d $SHARED_LOCATION ]; then
+        echo "$SHARED_LOCATION does not exist"
+        exit -1
+    fi
     SHARED_LOCATION=" --bind $SHARED_LOCATION "
+fi
+
+if [ ! -d PATHTO ]; then
+    echo "Container path does not exist"
+    exit -1
 fi
 
 if [ $ENABLE_OVERLAY -eq 1 ]; then
@@ -105,6 +115,8 @@ function print_help()
     printf "\t\t$ENABLE_SCREEN\n"
     printf "\t$ENV_OVERLAY_VALUE\tEnable the use of overlayfs\n"
     printf "\t\t$ENABLE_OVERLAY\n"
+    printf "\t$ENV_TEMPLATE_VALUE\tTemplate name\n"
+    printf "\t\t$TEMPLATE\n"
     printf "\n"
     exit -1
 }
