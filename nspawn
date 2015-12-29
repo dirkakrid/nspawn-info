@@ -18,17 +18,6 @@ DISCONNECT="disconnect"
 PACK="pack"
 VERSION="version"
 
-PATHTO="{CONTAINERS}"
-
-# per instance inputs
-ACTION=$1
-OBJECT=$2
-SCRIPTLOCATION="$( cd "$(dirname "$0")" ; pwd -P )"/nspawn
-SHARED_LOCATION="{SHARED}"
-ENABLE_X=1
-ENABLE_SCREEN=1
-ENABLE_OVERLAY=0
-
 # overlayfs settings
 OVERLAY_OS="os"
 OVERLAY_WORKING="wd"
@@ -49,6 +38,40 @@ ADDED_ARGS_SETTING="arguments"
 SCRIPT_VERSION="1.2.0"
 NON_OPERS="$LIST $HELP $OPTIONS $RUNNING $OPERATIONS $VERSION"
 ALL_OPTS="$REMOVE $START $BOOT $RESUME $TERMINATE $BCKBOOT $BCKSTART $PACK $NON_OPERS"
+
+# per instance inputs
+ACTION=$1
+OBJECT=$2
+
+# Evaluate any optional or required environmental settings
+function get-environment-setting()
+{
+    current_val=$(eval echo "\$"$1)
+    if [ -z "$current_val" ]; then
+        current_val=$2
+    fi
+    echo $current_val
+}
+
+# Variables for the location
+NSPAWN_ENV_PREFIX="NSPAWN_INFO_"
+ENV_SHARED_VALUE="${NSPAWN_ENV_PREFIX}SHARED"
+ENV_CONTAINER_VALUE="${NSPAWN_ENV_PREFIX}CONTAINERS"
+ENV_XHOST_VALUE="${NSPAWN_ENV_PREFIX}XHOST"
+ENV_SCREEN_VALUE="${NSPAWN_ENV_PREFIX}SCREEN"
+ENV_OVERLAY_VALUE="${NSPAWN_ENV_PREFIX}OVERLAY"
+SCRIPT_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
+SCRIPTLOCATION=$SCRIPT_PATH/nspawn
+SHARED_LOCATION=$(get-environment-setting "$ENV_SHARED_VALUE")
+PATHTO=$(get-environment-setting "$ENV_CONTAINER_VALUE" "$SCRIPT_PATH/containers")
+ENABLE_X=$(get-environment-setting "$ENV_XHOST_VALUE" 1)
+ENABLE_SCREEN=$(get-environment-setting "$ENV_SCREEN_VALUE" 1)
+ENABLE_OVERLAY=$(get-environment-setting "$ENV_OVERLAY_VALUE" 0)
+
+if [ ! -z $SHARED_LOCATION ]; then
+    SHARED_LOCATION=" --bind $SHARED_LOCATION "
+fi
+
 if [ $ENABLE_OVERLAY -eq 1 ]; then
     ALL_OPTS=$ALL_OPTS" $DISCONNECT"
 fi
@@ -69,6 +92,14 @@ function print_help()
     printf "\t%0s\t%20s\n" "ACTION" "The action to perform"
     printf "\t\t($ALL_OPTS)\n"
     printf "\t%0s\t%20s\n" "OBJECT" "The machine name to interact with"
+    printf "\n"
+    printf "\n"
+    printf "Environment variables:\n"
+    printf "\t$ENV_SHARED_VALUE\tDefault bind to apply to all containers\n"
+    printf "\t$ENV_CONTAINER_VALUE\tLocation of container files\n"
+    printf "\t$ENV_XHOST_VALUE\tEnable X sharing\n"
+    printf "\t$ENV_SCREEN_VALUE\tEnable screen to control/background containers\n"
+    printf "\t$ENV_OVERLAY_VALUE\tEnable the use of overlayfs\n"
     printf "\n"
     exit -1
 }
@@ -220,7 +251,7 @@ $START | $BOOT | $BCKBOOT | $BCKSTART)
     fi
     
     screen_name=$(get_screen_name "$OBJECT")
-    CMD_TXT="systemd-nspawn $nspawn_args -D \"$BOOT_OS_PATH/\" -M \"$OBJECT\" --bind $SHARED_LOCATION $ADDED_ARGS ${@:3}"
+    CMD_TXT="systemd-nspawn $nspawn_args -D \"$BOOT_OS_PATH/\" -M \"$OBJECT\" $SHARED_LOCATION $ADDED_ARGS ${@:3}"
     if [ $ENABLE_SCREEN -eq 1 ]; then
         CMD_TXT="screen $screen_args -S \"$screen_name\" $CMD_TXT"
     fi
