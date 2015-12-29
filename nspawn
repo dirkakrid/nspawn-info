@@ -96,10 +96,15 @@ function print_help()
     printf "\n"
     printf "Environment variables:\n"
     printf "\t$ENV_SHARED_VALUE\tDefault bind to apply to all containers\n"
+    printf "\t\t$SHARED_LOCATION\n"
     printf "\t$ENV_CONTAINER_VALUE\tLocation of container files\n"
+    printf "\t\t$PATHTO\n"
     printf "\t$ENV_XHOST_VALUE\tEnable X sharing\n"
+    printf "\t\t$ENABLE_X\n"
     printf "\t$ENV_SCREEN_VALUE\tEnable screen to control/background containers\n"
+    printf "\t\t$ENABLE_SCREEN\n"
     printf "\t$ENV_OVERLAY_VALUE\tEnable the use of overlayfs\n"
+    printf "\t\t$ENABLE_OVERLAY\n"
     printf "\n"
     exit -1
 }
@@ -179,7 +184,7 @@ fi
 
 if [ $UID -ne 0 ]; then
     printf "\nRestarting script using sudo\n"
-    sudo $SCRIPTLOCATION $@
+    sudo -E $SCRIPTLOCATION $@
     exit $?
 fi
 
