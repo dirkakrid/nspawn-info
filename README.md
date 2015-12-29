@@ -3,21 +3,14 @@ systemd-nspawn setup/configuration/information for usage/integration. The wrappe
 script provides the general structure of performing the following and is reasonable starting point
 
 ### Using the script
-* Download the nspawn script to preferred location and update the placeholders
-
-| Name             | URI                                                     |
-|------------------|---------------------------------------------------------|
-| {CONTAINERS}     | The path where containers should be stored              |
-| {SHARED}         | A path to share with the containers                     |
+* Download the nspawn script and check that all environment variables are set as preferred
 
 ### Setup/install
 * Run a script (sort of like this) and it should be all set
 ```text
 NSPAWN_FILE="/path/to/output/file/for/nspawn"
 NSPAWN_URL="https://raw.githubusercontent.com/enckse/nspawn-info/master/nspawn"
-CONTAINERS="\/path\/to\/containers\/"
-SHARED="\/path\/to\/shared"
-wget -qO- $NSPAWN_URL | sed -e "s/{CONTAINERS}/$CONTAINERS/g" | sed -e "s/{SHARED}/$SHARED/g" > $NSPAWN_FILE
+wget -qO- $NSPAWN_URL > $NSPAWN_FILE
 ```
 
 ### Bash auto-completion
@@ -49,7 +42,7 @@ complete -F _nspawn nspawn
 ```
 
 ### X (sharing)
-* Share X with the container via this (in the nspawn script, disable sharing X from the host by changing ENABLE_X to != 1):
+* Share X with the container via this (in the nspawn script, disable sharing X from the host by changing the environment to NSPAWN_INFO_XHOST != 1):
 ```text
 # host
 xhost +local: > /dev/null 2>&1
@@ -59,7 +52,7 @@ export DISPLAY=:0
 ```
 
 ### Screen
-* Machines are spawned via screen but that can be disabled by setting ENABLE_SCREEN != 1
+* Machines are spawned via screen but that can be disabled by setting the environment variable NSPAWN_INFO_SCREEN != 1
 
 ### Using debootstrap
 * Booting debian in another distro
@@ -74,7 +67,7 @@ debootstrap --arch=amd64 unstable debian/
 [machine_name].overlay=1
 [machine_name].arguments="--bind /var/log"
 ```
-Currently overlay will allow for disabling/enabling overlay fs for a specific machine and override the ENABLE_OVERLAY flag. The 'arguments' setting will be passed to systemd-nspawn as additional arguments at boot
+Currently overlay will allow for disabling/enabling overlay fs for a specific machine and override the NSPAWN_INFO_OVERLAY flag. The 'arguments' setting will be passed to systemd-nspawn as additional arguments at boot
 
 ### Useful references:
 [1] https://wiki.archlinux.org/index.php/Systemd-nspawn
