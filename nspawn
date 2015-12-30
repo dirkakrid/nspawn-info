@@ -69,19 +69,6 @@ ENABLE_SCREEN=$(get-environment-setting "$ENV_SCREEN_VALUE" 0)
 ENABLE_OVERLAY=$(get-environment-setting "$ENV_OVERLAY_VALUE" 0)
 TEMPLATE=$(get-environment-setting "$ENV_TEMPLATE_VALUE" "template")
 
-if [ ! -z $SHARED_LOCATION ]; then
-    if [ ! -d $SHARED_LOCATION ]; then
-        echo "$SHARED_LOCATION does not exist"
-        exit -1
-    fi
-    SHARED_LOCATION=" --bind $SHARED_LOCATION "
-fi
-
-if [ ! -d PATHTO ]; then
-    echo "Container path does not exist"
-    exit -1
-fi
-
 if [ $ENABLE_OVERLAY -eq 1 ]; then
     ALL_OPTS=$ALL_OPTS" $DISCONNECT"
 fi
@@ -161,6 +148,22 @@ function get_screen_name()
     echo "$SCREEN_START$1$SCREEN_END"
 }
 
+function check-dir()
+{
+    if [ ! -d $1 ]; then
+        echo "Invalid setting for $1"
+        exit -1
+    fi
+}
+
+function check-dirs-exist()
+{
+    if [ ! -z "$SHARED_LOCATION" ]; then
+        check-dir $SHARED_LOCATION "$ENV_SHARED_VALUE"
+    fi
+    check-dir $PATHTO "$ENV_CONTAINER_VALUE"
+}
+
 case $ACTION in
 $OPTIONS)
     echo $NON_OPERS
@@ -174,6 +177,7 @@ $OPERATIONS)
     exit 0
     ;;
 $LIST)
+    check-dirs-exist
     find $PATHTO/ -maxdepth 1 -type d -printf "%f\n" | grep -v '/$'
     exit $?
     ;;
@@ -200,6 +204,7 @@ if [ $UID -ne 0 ]; then
     exit $?
 fi
 
+check-dirs-exist
 if [ "$ACTION" == "$RUNNING" ]; then
     echo ""
     echo "Reporting from machinectl:"
@@ -268,7 +273,11 @@ $START | $BOOT | $BCKBOOT | $BCKSTART)
     fi
     
     screen_name=$(get_screen_name "$OBJECT")
-    CMD_TXT="systemd-nspawn $nspawn_args -D \"$BOOT_OS_PATH/\" -M \"$OBJECT\" $SHARED_LOCATION $ADDED_ARGS ${@:3}"
+    COMMON_BIND=""
+    if [ ! -z "$SHARED_LOCATION" ]; then
+        COMMON_BIND=" --bind $SHARED_LOCATION "
+    fi
+    CMD_TXT="systemd-nspawn $nspawn_args -D \"$BOOT_OS_PATH/\" -M \"$OBJECT\" $COMMON_BIND $ADDED_ARGS ${@:3}"
     if [ $ENABLE_SCREEN -eq 1 ]; then
         CMD_TXT="screen $screen_args -S \"$screen_name\" $CMD_TXT"
     fi
