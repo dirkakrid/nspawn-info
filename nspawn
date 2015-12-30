@@ -69,6 +69,23 @@ ENABLE_SCREEN=$(get-environment-setting "$ENV_SCREEN_VALUE" 0)
 ENABLE_OVERLAY=$(get-environment-setting "$ENV_OVERLAY_VALUE" 0)
 TEMPLATE=$(get-environment-setting "$ENV_TEMPLATE_VALUE" "template")
 
+if [ ! -z $SHARED_LOCATION ]; then
+    if [ ! -d $SHARED_LOCATION ]; then
+        echo "$SHARED_LOCATION does not exist"
+        exit -1
+    fi
+    SHARED_LOCATION=" --bind $SHARED_LOCATION "
+fi
+
+if [ ! -d PATHTO ]; then
+    echo "Container path does not exist"
+    exit -1
+fi
+
+if [ $ENABLE_OVERLAY -eq 1 ]; then
+    ALL_OPTS=$ALL_OPTS" $DISCONNECT"
+fi
+
 if [[ "$OBJECT" == */ ]]; then
     OBJECT=${OBJECT::-1}
 fi
@@ -156,6 +173,10 @@ $OPERATIONS)
     echo $ALL_OPTS
     exit 0
     ;;
+$LIST)
+    find $PATHTO/ -maxdepth 1 -type d -printf "%f\n" | grep -v '/$'
+    exit $?
+    ;;
 $VERSION)
     echo "Script Version: $SCRIPT_VERSION"
     echo "systemd-nspawn version:"
@@ -179,39 +200,16 @@ if [ $UID -ne 0 ]; then
     exit $?
 fi
 
-if [ ! -z $SHARED_LOCATION ]; then
-    if [ ! -d $SHARED_LOCATION ]; then
-        echo "$SHARED_LOCATION does not exist"
-        exit -1
-    fi
-    SHARED_LOCATION=" --bind $SHARED_LOCATION "
+if [ "$ACTION" == "$RUNNING" ]; then
+    echo ""
+    echo "Reporting from machinectl:"
+    machinectl list
+    echo ""
+    echo "Reported from screen:"
+    screen -list | grep "$SCREEN_START*.*$SCREEN_END"
+    echo ""
+    exit $?
 fi
-
-if [ ! -d PATHTO ]; then
-    echo "Container path does not exist"
-    exit -1
-fi
-
-if [ $ENABLE_OVERLAY -eq 1 ]; then
-    ALL_OPTS=$ALL_OPTS" $DISCONNECT"
-fi
-
-case $ACTION in
-    $LIST)
-        find $PATHTO/ -maxdepth 1 -type d -printf "%f\n" | grep -v '/$'
-        exit $?
-        ;;
-    $RUNNING)
-        echo ""
-        echo "Reporting from machinectl:"
-        machinectl list
-        echo ""
-        echo "Reported from screen:"
-        screen -list | grep "$SCREEN_START*.*$SCREEN_END"
-        echo ""
-        exit $?
-        ;;
-esac
 
 if [ -z "$OBJECT" ]; then
     print_help "Object is required!"
