@@ -59,6 +59,7 @@ ENV_XHOST_VALUE="${NSPAWN_ENV_PREFIX}XHOST"
 ENV_SCREEN_VALUE="${NSPAWN_ENV_PREFIX}SCREEN"
 ENV_OVERLAY_VALUE="${NSPAWN_ENV_PREFIX}OVERLAY"
 ENV_TEMPLATE_VALUE="${NSPAWN_ENV_PREFIX}TEMPLATE"
+ENV_LOGGING_VALUE="${NSPAWN_ENV_PREFIX}LOGGING"
 SCRIPT_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
 SCRIPTLOCATION=$SCRIPT_PATH/nspawn
 SHARED_LOCATION=$(get-environment-setting "$ENV_SHARED_VALUE")
@@ -66,8 +67,10 @@ PATHTO=$(get-environment-setting "$ENV_CONTAINER_VALUE" "$SCRIPT_PATH/containers
 ENABLE_X=$(get-environment-setting "$ENV_XHOST_VALUE" 1)
 ENABLE_SCREEN=$(get-environment-setting "$ENV_SCREEN_VALUE" 0)
 ENABLE_OVERLAY=$(get-environment-setting "$ENV_OVERLAY_VALUE" 0)
+ENABLE_LOGGING=$(get-environment-setting "$ENV_LOGGING_VALUE" 0)
 TEMPLATE=$(get-environment-setting "$ENV_TEMPLATE_VALUE" "template")
 CONTAINER_CONFIG="$PATHTO/$CONFIG_FILE_NAME"
+NSPAWN_LOG="/var/log/nspawn-info.log"
 
 if [ $ENABLE_OVERLAY -eq 1 ]; then
     ALL_OPTS=$ALL_OPTS" $DISCONNECT"
@@ -104,8 +107,17 @@ function print_help()
     printf "\t\t$ENABLE_OVERLAY\n"
     printf "\t$ENV_TEMPLATE_VALUE\tTemplate name\n"
     printf "\t\t$TEMPLATE\n"
+    printf "\t$ENV_LOGGING_VALUE\tEnable logging output\n"
+    printf "\t\t$ENABLE_LOGGING\n"
     printf "\n"
     exit -1
+}
+
+function do-logging()
+{
+    if [ $ENABLE_LOGGING -eq 1 ]; then
+        echo "$1" >> $NSPAWN_LOG
+    fi
 }
 
 function get-config-value()
@@ -204,6 +216,9 @@ if [ $UID -ne 0 ]; then
     exit $?
 fi
 
+do-logging "Action: $ACTION"
+do-logging "Object; $OBJECT"
+
 check-dirs-exist
 if [ "$ACTION" == "$RUNNING" ]; then
     echo ""
@@ -281,6 +296,7 @@ $START | $BOOT | $BCKBOOT | $BCKSTART)
     if [ $ENABLE_SCREEN -eq 1 ]; then
         CMD_TXT="screen $screen_args -S \"$screen_name\" $CMD_TXT"
     fi
+    do-logging "$CMD_TXT"
     eval $CMD_TXT
     ;;
 $PACK)
