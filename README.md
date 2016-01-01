@@ -14,32 +14,7 @@ wget -qO- $NSPAWN_URL > $NSPAWN_FILE
 ```
 
 ### Bash auto-completion
-* Add the following as a script at "/etc/bash_completion.d/nspawn"
-```text
-#!/bin/bash
-_nspawn()
-{
-    local cur prev opts idx first
-    cur=${COMP_WORDS[COMP_CWORD]}
-    prev=${COMP_WORDS[COMP_CWORD-1]}
-    if [ $COMP_CWORD -eq 1 ]; then
-        opts=$(nspawn operations)
-        COMPREPLY=( $(compgen -W "$opts" -- $cur) )
-    else
-    first="false"
-        for idx in $(nspawn options); do
-            if [[ $prev == $idx ]]; then
-                first="true"
-            fi
-        done
-        if [[ $first == "false" ]]; then
-            opts=$(nspawn list) 
-            COMPREPLY=( $(compgen -W "$opts" -- $cur) )
-        fi
-    fi
-}
-complete -F _nspawn nspawn
-```
+* Use the 'nspawn_autocompletion' for bash auto completion in /etc/bash_completion.d/
 
 ### X (sharing)
 * Share X with the container via this (in the nspawn script, disable sharing X from the host by changing the environment to NSPAWN_INFO_XHOST != 1):
