@@ -190,7 +190,7 @@ $OPERATIONS)
     ;;
 $LIST)
     check-dirs-exist
-    find $PATHTO/ -maxdepth 1 -type d -printf "%f\n" | grep -v '/$'
+    find $PATHTO/ -maxdepth 1 -type d -printf "%f\n" | grep -v '/$' | sort
     exit $?
     ;;
 $VERSION)
@@ -226,7 +226,7 @@ if [ "$ACTION" == "$RUNNING" ]; then
     machinectl list
     echo ""
     echo "Reported from screen:"
-    screen -list | grep "$SCREEN_START*.*$SCREEN_END"
+    screen -list | grep "$SCREEN_START*.*$SCREEN_END" | sort
     echo ""
     exit $?
 fi
