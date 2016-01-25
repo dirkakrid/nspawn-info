@@ -288,6 +288,13 @@ $START | $BOOT | $BCKBOOT | $BCKSTART)
     fi
     
     screen_name=$(get_screen_name "$OBJECT")
+    if [ $ENABLE_SCREEN -eq 1 ]; then
+        screen -S $screen_name -Q select .
+        if [ $? -eq 0 ]; then
+            echo "$OBJECT is already running"
+            exit -1
+        fi
+    fi
     COMMON_BIND=""
     if [ ! -z "$SHARED_LOCATION" ]; then
         COMMON_BIND=" --bind $SHARED_LOCATION "
