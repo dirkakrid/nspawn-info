@@ -33,7 +33,7 @@ OVERLAY_SETTING="overlay"
 ADDED_ARGS_SETTING="arguments"
 
 # Help/command aggregates
-SCRIPT_VERSION="1.2.0"
+SCRIPT_VERSION="1.3.0"
 NON_OPERS="$LIST $HELP $OPTIONS $RUNNING $OPERATIONS $VERSION"
 ALL_OPTS="$REMOVE $START $BOOT $RESUME $TERMINATE $BCKBOOT $BCKSTART $PACK $NON_OPERS"
 
@@ -53,7 +53,7 @@ function get-environment-setting()
 
 # Variables for the location
 NSPAWN_ENV_PREFIX="NSPAWN_INFO_"
-ENV_SHARED_VALUE="${NSPAWN_ENV_PREFIX}SHARED"
+ENV_ARGS_VALUE="${NSPAWN_ENV_PREFIX}ARGS"
 ENV_CONTAINER_VALUE="${NSPAWN_ENV_PREFIX}CONTAINERS"
 ENV_XHOST_VALUE="${NSPAWN_ENV_PREFIX}XHOST"
 ENV_SCREEN_VALUE="${NSPAWN_ENV_PREFIX}SCREEN"
@@ -62,7 +62,7 @@ ENV_TEMPLATE_VALUE="${NSPAWN_ENV_PREFIX}TEMPLATE"
 ENV_LOGGING_VALUE="${NSPAWN_ENV_PREFIX}LOGGING"
 SCRIPT_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
 SCRIPTLOCATION=$SCRIPT_PATH/nspawn
-SHARED_LOCATION=$(get-environment-setting "$ENV_SHARED_VALUE")
+COMMON_ARGS=$(get-environment-setting "$ENV_ARGS_VALUE")
 PATHTO=$(get-environment-setting "$ENV_CONTAINER_VALUE" "$SCRIPT_PATH/containers")
 ENABLE_X=$(get-environment-setting "$ENV_XHOST_VALUE" 1)
 ENABLE_SCREEN=$(get-environment-setting "$ENV_SCREEN_VALUE" 0)
@@ -95,8 +95,8 @@ function print_help()
     printf "\n"
     printf "\n"
     printf "Environment variables:\n"
-    printf "\t$ENV_SHARED_VALUE\tDefault bind to apply to all containers\n"
-    printf "\t\t$SHARED_LOCATION\n"
+    printf "\t$ENV_ARGS_VALUE\tDefault arguments to apply to all containers\n"
+    printf "\t\t$COMMON_ARGS\n"
     printf "\t$ENV_CONTAINER_VALUE\tLocation of container files\n"
     printf "\t\t$PATHTO\n"
     printf "\t$ENV_XHOST_VALUE\tEnable X sharing\n"
@@ -170,9 +170,6 @@ function check-dir()
 
 function check-dirs-exist()
 {
-    if [ ! -z "$SHARED_LOCATION" ]; then
-        check-dir $SHARED_LOCATION "$ENV_SHARED_VALUE"
-    fi
     check-dir $PATHTO "$ENV_CONTAINER_VALUE"
 }
 
@@ -296,8 +293,8 @@ $START | $BOOT | $BCKBOOT | $BCKSTART)
         fi
     fi
     COMMON_BIND=""
-    if [ ! -z "$SHARED_LOCATION" ]; then
-        COMMON_BIND=" --bind $SHARED_LOCATION "
+    if [ ! -z "$COMMON_ARGS" ]; then
+        COMMON_BIND="$COMMON_ARGS"
     fi
     CMD_TXT="systemd-nspawn $nspawn_args -D \"$BOOT_OS_PATH/\" -M \"$OBJECT\" $COMMON_BIND $ADDED_ARGS ${@:3}"
     if [ $ENABLE_SCREEN -eq 1 ]; then
