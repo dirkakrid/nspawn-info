@@ -87,7 +87,7 @@ function print_help()
         printf "\nError: %0s\n\n" "$1"
     fi
 
-    printf "Usage: nspawn-wrapper [ACTION] [OBJECT]\n"
+    printf "Usage: nspawn [ACTION] [OBJECT]\n"
     printf "%0s\n" "Provides a simple wrapper around systemd-nspawn"
     printf "\t%0s\t%20s\n" "ACTION" "The action to perform"
     printf "\t\t($ALL_OPTS)\n"
