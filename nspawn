@@ -10,6 +10,7 @@ OPERATIONS="operations"
 HELP="help"
 LIST="list"
 RUNNING="running"
+STATUS="status"
 TERMINATE="terminate"
 BCKBOOT="background"
 BCKSTART="detached"
@@ -34,7 +35,7 @@ ADDED_ARGS_SETTING="arguments"
 
 # Help/command aggregates
 SCRIPT_VERSION="1.3.0"
-NON_OPERS="$LIST $HELP $OPTIONS $RUNNING $OPERATIONS $VERSION"
+NON_OPERS="$LIST $HELP $OPTIONS $RUNNING $OPERATIONS $VERSION $STATUS"
 ALL_OPTS="$REMOVE $START $BOOT $RESUME $TERMINATE $BCKBOOT $BCKSTART $PACK $NON_OPERS"
 
 # per instance inputs
@@ -217,6 +218,12 @@ do-logging "Action: $ACTION"
 do-logging "Object; $OBJECT"
 
 check-dirs-exist
+
+# status is an alias for running
+if [ "$ACTION" == "$STATUS" ]; then
+    ACTION=$RUNNING
+fi
+
 if [ "$ACTION" == "$RUNNING" ]; then
     echo ""
     echo "Reporting from machinectl:"
