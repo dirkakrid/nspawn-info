@@ -269,6 +269,10 @@ $START | $BOOT | $BCKBOOT | $BCKSTART)
             fi
         else
             if [ ! -d $BOOT_OS_PATH ]; then
+                read -p "creating '$OBJECT', continue (y/n)? " yn
+                if [[ $yn != "y" ]]; then
+                    exit -1
+                fi
                 echo "Setting up $OBJECT for first-time use (this may take a moment)..."
                 cp -R $PATHTO/$TEMPLATE $BOOT_OS_PATH
             fi
