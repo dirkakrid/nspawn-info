@@ -208,8 +208,7 @@ if [ $UID -ne 0 ]; then
     exit $?
 fi
 
-do-logging "Action: $ACTION"
-do-logging "Object; $OBJECT"
+do-logging "Action: $ACTION $OBJECT"
 
 check-dirs-exist
 
