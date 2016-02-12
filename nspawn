@@ -54,6 +54,7 @@ function get-environment-setting()
 
 # Variables for the location
 NSPAWN_ENV_PREFIX="NSPAWN_INFO_"
+ENV_JOURNAL_VALUE="${NSPAWN_ENV_PREFIX}JOURNAL"
 ENV_ARGS_VALUE="${NSPAWN_ENV_PREFIX}ARGS"
 ENV_CONTAINER_VALUE="${NSPAWN_ENV_PREFIX}CONTAINERS"
 ENV_XHOST_VALUE="${NSPAWN_ENV_PREFIX}XHOST"
@@ -68,8 +69,8 @@ ENABLE_X=$(get-environment-setting "$ENV_XHOST_VALUE" 1)
 ENABLE_SCREEN=$(get-environment-setting "$ENV_SCREEN_VALUE" 0)
 ENABLE_OVERLAY=$(get-environment-setting "$ENV_OVERLAY_VALUE" 0)
 TEMPLATE=$(get-environment-setting "$ENV_TEMPLATE_VALUE" "template")
+NSPAWN_SYSTEMD_CAT=$(get-environment-setting "$ENV_JOURNAL_VALUE" "nspawn")
 CONTAINER_CONFIG="$PATHTO/$CONFIG_FILE_NAME"
-NSPAWN_SYSTEMD_CAT="nspawn"
 
 if [ $ENABLE_OVERLAY -eq 1 ]; then
     ALL_OPTS=$ALL_OPTS" $DISCONNECT"
@@ -106,6 +107,8 @@ function print_help()
     printf "\t\t$ENABLE_OVERLAY\n"
     printf "\t$ENV_TEMPLATE_VALUE\tTemplate name\n"
     printf "\t\t$TEMPLATE\n"
+    printf "\t$ENV_JOURNAL_VALUE\tJournal category\n"
+    printf "\t\t$NSPAWN_SYSTEMD_CAT\n"
     printf "\n"
     exit -1
 }
