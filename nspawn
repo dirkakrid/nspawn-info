@@ -17,6 +17,7 @@ BCKSTART="detached"
 DISCONNECT="disconnect"
 PACK="pack"
 VERSION="version"
+STOP="stop"
 
 # overlayfs settings
 OVERLAY_OS="os"
@@ -36,7 +37,7 @@ ADDED_ARGS_SETTING="arguments"
 # Help/command aggregates
 SCRIPT_VERSION="1.4.0"
 NON_OPERS="$LIST $HELP $OPTIONS $RUNNING $OPERATIONS $VERSION $STATUS"
-ALL_OPTS="$REMOVE $START $BOOT $RESUME $TERMINATE $BCKBOOT $BCKSTART $PACK $NON_OPERS"
+ALL_OPTS="$REMOVE $START $BOOT $RESUME $TERMINATE $BCKBOOT $BCKSTART $PACK $NON_OPERS $STOP"
 
 # per instance inputs
 ACTION=$1
@@ -243,8 +244,8 @@ fi
 
 OBJPATH=$PATHTO/$OBJECT
 case $ACTION in
-$DISCONNECT | $REMOVE | $TERMINATE)
-    if [[ $ACTION == $TERMINATE ]]; then
+$DISCONNECT | $REMOVE | $TERMINATE | $STOP)
+    if [[ $ACTION == $TERMINATE ]] || [[ $ACTION == $STOP ]]; then
         machinectl terminate "$OBJECT"
     fi
 
