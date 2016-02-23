@@ -18,6 +18,7 @@ DISCONNECT="disconnect"
 PACK="pack"
 VERSION="version"
 STOP="stop"
+UPDATE="update"
 
 # overlayfs settings
 OVERLAY_OS="os"
@@ -37,7 +38,7 @@ ADDED_ARGS_SETTING="arguments"
 # Help/command aggregates
 SCRIPT_VERSION="1.4.0"
 NON_OPERS="$LIST $HELP $OPTIONS $RUNNING $OPERATIONS $VERSION $STATUS"
-ALL_OPTS="$REMOVE $START $BOOT $RESUME $TERMINATE $BCKBOOT $BCKSTART $PACK $NON_OPERS $STOP"
+ALL_OPTS="$REMOVE $START $BOOT $RESUME $TERMINATE $BCKBOOT $BCKSTART $PACK $NON_OPERS $STOP $UPDATE"
 
 # per instance inputs
 ACTION=$1
@@ -167,6 +168,11 @@ function check-dir()
     fi
 }
 
+function list-items()
+{
+    find $PATHTO/ -maxdepth 1 -type d -printf "%f\n" | grep -v '/$' | sort
+}
+
 function check-dirs-exist()
 {
     check-dir $PATHTO "$ENV_CONTAINER_VALUE"
@@ -186,7 +192,7 @@ $OPERATIONS)
     ;;
 $LIST)
     check-dirs-exist
-    find $PATHTO/ -maxdepth 1 -type d -printf "%f\n" | grep -v '/$' | sort
+    list-items
     exit $?
     ;;
 $VERSION)
@@ -230,6 +236,19 @@ if [ "$ACTION" == "$RUNNING" ]; then
     screen -list | grep "$SCREEN_START*.*$SCREEN_END" | sort
     echo ""
     exit $?
+fi
+
+if [ "$ACTION" == "$UPDATE" ]; then
+    for item in $(list-items); do
+        if [ ! -z "$OBJECT" ]; then
+            if [[ "$item" != "$OBJECT" ]]; then
+                continue
+            fi
+        fi
+        echo "updating: $PATHTO/$item"
+        arch-chroot $PATHTO/$item /bin/bash -c 'pacman -Syu'
+    done
+    exit -1
 fi
 
 if [ -z "$OBJECT" ]; then
