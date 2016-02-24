@@ -246,6 +246,25 @@ if [ "$ACTION" == "$UPDATE" ]; then
             fi
         fi
         echo "updating: $PATHTO/$item"
+        screen_check=$(get_screen_name "$item")
+        screen -list | grep -q -F "$screen_check"
+        if [ $? -eq 0 ]; then
+            SKIP_KEY="skip"
+            FORCE_KEY="force"
+            KILL_KEY="kill"
+            read -p "$item is running: ($SKIP_KEY/$FORCE_KEY/$KILL_KEY)? " skf
+            do-logging "update command: $skf"
+            case $skf in
+                $FORCE_KEY)
+                    ;;
+                $KILL_KEY)
+                    machinectl terminate "$item"
+                    ;;
+                *)
+                    continue
+                    ;;
+            esac
+        fi
         arch-chroot $PATHTO/$item /bin/bash -c 'pacman -Syu'
     done
     exit -1
