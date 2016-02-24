@@ -19,6 +19,7 @@ PACK="pack"
 VERSION="version"
 STOP="stop"
 UPDATE="update"
+KILL="kill"
 
 # overlayfs settings
 OVERLAY_OS="os"
@@ -38,7 +39,7 @@ ADDED_ARGS_SETTING="arguments"
 # Help/command aggregates
 SCRIPT_VERSION="1.4.1"
 NON_OPERS="$LIST $HELP $OPTIONS $RUNNING $OPERATIONS $VERSION $STATUS"
-ALL_OPTS="$REMOVE $START $BOOT $RESUME $TERMINATE $BCKBOOT $BCKSTART $PACK $NON_OPERS $STOP $UPDATE"
+ALL_OPTS="$REMOVE $START $BOOT $RESUME $TERMINATE $BCKBOOT $BCKSTART $PACK $NON_OPERS $STOP $UPDATE $KILL"
 
 # per instance inputs
 ACTION=$1
@@ -227,6 +228,11 @@ if [ "$ACTION" == "$STATUS" ]; then
     ACTION=$RUNNING
 fi
 
+# stop and kill are aliases for terminate
+if [ "$ACTION" == "$STOP" ] || [ "$ACTION" == "$KILL" ]; then
+    ACTION=$TERMINATE
+fi
+
 if [ "$ACTION" == "$RUNNING" ]; then
     echo ""
     echo "Reporting from machinectl:"
@@ -291,8 +297,8 @@ fi
 
 OBJPATH=$PATHTO/$OBJECT
 case $ACTION in
-$DISCONNECT | $REMOVE | $TERMINATE | $STOP)
-    if [[ $ACTION == $TERMINATE ]] || [[ $ACTION == $STOP ]]; then
+$DISCONNECT | $REMOVE | $TERMINATE)
+    if [[ $ACTION == $TERMINATE ]]; then
         machinectl terminate "$OBJECT"
     fi
 
