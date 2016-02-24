@@ -245,7 +245,14 @@ if [ "$ACTION" == "$UPDATE" ]; then
                 continue
             fi
         fi
-        echo "updating: $PATHTO/$item"
+        echo
+        read -p "updating: $PATHTO/$item - continue (y/n)? " yn
+        if [ -z "$yn" ]; then
+            yn="y"
+        fi
+        if [[ "$yn" != "y" ]]; then
+            continue
+        fi
         screen_check=$(get_screen_name "$item")
         screen -list | grep -q -F "$screen_check"
         if [ $? -eq 0 ]; then
