@@ -240,19 +240,21 @@ fi
 
 if [ "$ACTION" == "$UPDATE" ]; then
     for item in $(list-items); do
-        if [ ! -z "$OBJECT" ]; then
+        if [ -z "$OBJECT" ]; then
+            echo
+            read -p "updating: $PATHTO/$item - continue (y/n)? " yn
+            if [ -z "$yn" ]; then
+                yn="y"
+            fi
+            if [[ "$yn" != "y" ]]; then
+                continue
+            fi
+        else
             if [[ "$item" != "$OBJECT" ]]; then
                 continue
             fi
         fi
-        echo
-        read -p "updating: $PATHTO/$item - continue (y/n)? " yn
-        if [ -z "$yn" ]; then
-            yn="y"
-        fi
-        if [[ "$yn" != "y" ]]; then
-            continue
-        fi
+        echo "starting update: $item"
         screen_check=$(get_screen_name "$item")
         screen -list | grep -q -F "$screen_check"
         if [ $? -eq 0 ]; then
