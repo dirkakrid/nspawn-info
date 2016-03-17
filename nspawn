@@ -295,9 +295,23 @@ if [[ $OBJECT != "$TEMPLATE" ]]; then
     ENABLE_OVERLAY=$(get-config-value "$USER_CONFIG" "$OBJECT" "$OVERLAY_SETTING" "$ENABLE_OVERLAY")
 fi
 
+function screen-up()
+{
+    screen -S $1 -Q select . &>/dev/null
+    echo $?
+}
+
 OBJPATH=$PATHTO/$OBJECT
+screen_name=$(get_screen_name "$OBJECT")
 case $ACTION in
 $DISCONNECT | $REMOVE | $TERMINATE)
+    if [ $ENABLE_SCREEN -eq 1 ]; then
+        is_up=$(screen-up "$screen-name")
+        if [ $is_up -eq 0 ]; then
+            screen -X 'exit'
+        fi
+    fi
+
     if [[ $ACTION == $TERMINATE ]]; then
         machinectl terminate "$OBJECT"
     fi
@@ -305,7 +319,7 @@ $DISCONNECT | $REMOVE | $TERMINATE)
     if [ $ENABLE_OVERLAY -eq 1 ]; then
         do_umount $OBJPATH
     fi
-    
+ 
     if [[ $ACTION == $REMOVE ]]; then
         rm -rf $OBJPATH
     fi
@@ -345,10 +359,9 @@ $START | $BOOT | $BCKBOOT | $BCKSTART)
         screen_args="-d -m"
     fi
     
-    screen_name=$(get_screen_name "$OBJECT")
     if [ $ENABLE_SCREEN -eq 1 ]; then
-        screen -S $screen_name -Q select . &>/dev/null
-        if [ $? -eq 0 ]; then
+        is_up=$(screen-up "$screen_name")
+        if [ $is_up -eq 0 ]; then
             echo "$OBJECT is already running"
             exit -1
         fi
@@ -371,7 +384,6 @@ $PACK)
     cd $CURRENT_PWD
     ;;
 $RESUME)
-    screen_name=$(get_screen_name "$OBJECT")
     screen -r "$screen_name"
     ;;
 *)
