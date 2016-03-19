@@ -198,7 +198,6 @@ if [ -z "$ACTION" ]; then
 fi
 
 if [ $UID -ne 0 ]; then
-    printf "\nRestarting script using sudo\n"
     sudo -E $SCRIPTLOCATION $@
     exit $?
 fi
@@ -235,15 +234,24 @@ case $ACTION in
         ;;
 esac
 
+function print-running()
+{
+    printf "\n%20s%20s%30s" "$1" "$2" "$3"
+}
+
 if [ "$ACTION" == "$RUNNING" ]; then
-    echo ""
-    echo "Reporting from machinectl:"
-    machinectl list
-    echo ""
-    echo "Reported from screen:"
-    screen -list | grep "$SCREEN_START*.*$SCREEN_END" | sort
-    echo ""
-    exit $?
+    print-running "name" "machinectl" "screen"
+    print-running "----" "----------" "------"
+    for item in $(list-items); do
+        machine_ctl=$(machinectl list | grep -E "^$item " | cut -d " " -f 1)
+        item_name=$(get_screen_name "$item")
+        screen_as=$(screen -list | grep "$item_name" | cut -d "." -f 2 | cut -d "(" -f 1 | xargs | sed "s/^$SCREEN_START//g" | sed "s/$SCREEN_END$//g")
+        print-running "$item" "$machine_ctl" "$screen_as"
+        
+    done
+    echo
+    echo
+    exit 0
 fi
 
 if [ -z "$OBJECT" ]; then
