@@ -5,7 +5,6 @@ script provides the general structure of performing the following and is reasona
 ### Using the script
 * Download the nspawn script and check that all environment variables are set as preferred
 
-
 ### Setup/install
 * Run a script (sort of like this) and it should be all set
 ```text
@@ -18,13 +17,20 @@ wget -qO- $NSPAWN_URL > $NSPAWN_FILE
 * Use the 'nspawn_autocompletion' for bash auto completion in /etc/bash_completion.d/
 
 ### X (sharing)
-* Share X with the container via this (in the nspawn script, disable sharing X from the host by changing the environment to NSPAWN_INFO_XHOST != 1):
+* Share X with the container via this
 ```text
 # host
 xhost +local: > /dev/null 2>&1
 
 # container
 export DISPLAY=:0
+```
+
+### Allowing root login
+* Per the arch wiki if, at login, root can't login
+```
+# again, check the arch wiki to validate this
+rm /etc/securetty
 ```
 
 ### Screen
@@ -37,6 +43,13 @@ export DISPLAY=:0
 debootstrap --arch=amd64 unstable debian/
 ```
 
+### Using pacstrap
+* Loading with pacstrap
+```
+cd /path/to/containers
+sudo pacstrap -i -c -d template/ base
+```
+
 ### Updating
 * Just 'arch-chroot' in and call pacman
 ```
@@ -46,10 +59,8 @@ arch-chroot /path/to/container /bin/bash -c 'pacman Syyu'
 ### Config file
 * Storing a config file in $HOME/.config/.nspawn-info can provide some overrides for the user while providing a .nspawn-info in the container directory will be system-wide (but overriden by any user settings)
 ```
-[machine_name].overlay=1
-[machine_name].arguments="--bind /var/log"
+[machine_name].arguments=--bind /var/log
 ```
-Currently overlay will allow for disabling/enabling overlay fs for a specific machine and override the NSPAWN_INFO_OVERLAY flag. The 'arguments' setting will be passed to systemd-nspawn as additional arguments at boot
 
 ### Useful references:
 [1] https://wiki.archlinux.org/index.php/Systemd-nspawn
