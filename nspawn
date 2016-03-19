@@ -63,6 +63,7 @@ NSPAWN_ENV_PREFIX="NSPAWN_INFO_"
 ENV_JOURNAL_VALUE="${NSPAWN_ENV_PREFIX}JOURNAL"
 ENV_ARGS_VALUE="${NSPAWN_ENV_PREFIX}ARGS"
 ENV_CONTAINER_VALUE="${NSPAWN_ENV_PREFIX}CONTAINERS"
+ENV_XHOST_VALUE="${NSPAWN_ENV_PREFIX}XHOST"
 ENV_SCREEN_VALUE="${NSPAWN_ENV_PREFIX}SCREEN"
 ENV_TEMPLATE_VALUE="${NSPAWN_ENV_PREFIX}TEMPLATE"
 SCRIPT_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
@@ -72,6 +73,7 @@ PATHTO=$(get-environment-setting "$ENV_CONTAINER_VALUE" "$SCRIPT_PATH/containers
 ENABLE_SCREEN=$(get-environment-setting "$ENV_SCREEN_VALUE" 0)
 TEMPLATE=$(get-environment-setting "$ENV_TEMPLATE_VALUE" "template")
 NSPAWN_SYSTEMD_CAT=$(get-environment-setting "$ENV_JOURNAL_VALUE" "nspawn")
+ENABLE_XHOST=$(get-environment-setting "$ENV_XHOST_VALUE" 1)
 CONTAINER_CONFIG="$PATHTO/$CONFIG_FILE_NAME"
 
 if [[ "$OBJECT" == */ ]]; then
@@ -103,6 +105,8 @@ function print_help()
     printf "\t\t$TEMPLATE\n"
     printf "\t$ENV_JOURNAL_VALUE\tJournal category\n"
     printf "\t\t$NSPAWN_SYSTEMD_CAT\n"
+    printf "\t$ENV_XHOST_VALUE\tEnable X hosting\n"
+    printf "\t\t$ENABLE_XHOST\n"
     printf "\n"
     exit -1
 }
@@ -184,6 +188,10 @@ $VERSION)
     exit 0
     ;;
 esac
+
+if [ $ENABLE_HOST -eq 1 ]; then
+    xhost +local: > /dev/null 2>&1
+fi
 
 if [ -z "$ACTION" ]; then
     print_help "Action is required!"
