@@ -53,7 +53,7 @@ sudo pacstrap -i -c -d template/ base
 ### Updating
 * Just 'arch-chroot' in and call pacman
 ```
-arch-chroot /path/to/container /bin/bash -c 'pacman Syyu'
+arch-chroot /path/to/container /bin/bash -c 'pacman -Syyu'
 ```
 
 ### Config file

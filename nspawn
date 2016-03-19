@@ -28,6 +28,7 @@ ATTACH="attach"
 COPY="copy"
 CLONE="clone"
 NEW="new"
+UPDATE="update"
 
 # Screen naming/settings
 SCREEN_START="nspawn-"
@@ -41,7 +42,7 @@ ADDED_ARGS_SETTING="arguments"
 # Help/command aggregates
 SCRIPT_VERSION="1.5.0"
 NON_OPERS="$LIST $HELP $OPTIONS $RUNNING $OPERATIONS $VERSION $STATUS"
-ALL_OPTS="$COPY $CLONE $NEW $SHELL $CONNECT $LOGIN $REBOOT $RESTART $ATTACH $POWEROFF $REMOVE $START $BOOT $RESUME $TERMINATE $BCKBOOT $BCKSTART $PACK $NON_OPERS $STOP $KILL"
+ALL_OPTS="$UPDATE $COPY $CLONE $NEW $SHELL $CONNECT $LOGIN $REBOOT $RESTART $ATTACH $POWEROFF $REMOVE $START $BOOT $RESUME $TERMINATE $BCKBOOT $BCKSTART $PACK $NON_OPERS $STOP $KILL"
 
 # per instance inputs
 ACTION=$1
@@ -250,8 +251,21 @@ function screen-up()
     echo $?
 }
 
+function is-running()
+{
+    result=0 
+    if [ $ENABLE_SCREEN -eq 1 ]; then
+        is_up=$(screen-up "$1")
+        if [ $is_up -eq 0 ]; then
+            result=1
+        fi
+    fi
+    echo $result
+}
+
 OBJPATH=$PATHTO/$OBJECT
 screen_name=$(get_screen_name "$OBJECT")
+running=$(is-running "$screen_name")
 case $ACTION in
 $REMOVE | $TERMINATE | $POWEROFF)
     if [[ $ACTION == $POWEROFF ]]; then
@@ -285,13 +299,10 @@ $BOOT | $BCKBOOT)
     if [[ $ACTION == $BCKBOOT ]] ; then
         screen_args="-d -m"
     fi
-    
-    if [ $ENABLE_SCREEN -eq 1 ]; then
-        is_up=$(screen-up "$screen_name")
-        if [ $is_up -eq 0 ]; then
-            echo "$OBJECT is already running"
-            exit -1
-        fi
+   
+    if [ $running -eq 1 ]; then 
+        echo "$OBJECT is already running"
+        exit -1
     fi
     COMMON_BIND=""
     if [ ! -z "$COMMON_ARGS" ]; then
@@ -313,10 +324,19 @@ $SHELL)
 $REBOOT)
     machinectl reboot "$OBJECT"
     ;;
-$PACK)
+$UPDATE | $PACK)
+    if [ $running -eq 1 ]; then
+        echo "$OBJECT is running...skipping $ACTION"
+        exit -1
+    fi
+    
     CURRENT_PWD=$PWD
     cd $PATHTO
-    tar -cvpzf $CURRENT_PWD/nspawn-$OBJECT.tar.gz --one-file-system "$OBJECT/"
+    if [[ $ACTION == $PACK ]]; then
+        tar -cvpzf $CURRENT_PWD/nspawn-$OBJECT.tar.gz --one-file-system "$OBJECT/"
+    else
+        arch-chroot $OBJPATH /bin/bash -c 'pacman -Syyu'
+    fi
     cd $CURRENT_PWD
     ;;
 $RESUME)
