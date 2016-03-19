@@ -18,6 +18,13 @@ PACK="pack"
 VERSION="version"
 STOP="stop"
 KILL="kill"
+POWEROFF="poweroff"
+SHELL="shell"
+CONNECT="connect"
+LOGIN="login"
+REBOOT="reboot"
+RESTART="restart"
+ATTACH="attach"
 
 # Screen naming/settings
 SCREEN_START="nspawn-"
@@ -31,7 +38,7 @@ ADDED_ARGS_SETTING="arguments"
 # Help/command aggregates
 SCRIPT_VERSION="1.5.0"
 NON_OPERS="$LIST $HELP $OPTIONS $RUNNING $OPERATIONS $VERSION $STATUS"
-ALL_OPTS="$REMOVE $START $BOOT $RESUME $TERMINATE $BCKBOOT $BCKSTART $PACK $NON_OPERS $STOP $KILL"
+ALL_OPTS="$SHELL $CONNECT $LOGIN $REBOOT $RESTART $ATTACH $POWEROFF $REMOVE $START $BOOT $RESUME $TERMINATE $BCKBOOT $BCKSTART $PACK $NON_OPERS $STOP $KILL"
 
 # per instance inputs
 ACTION=$1
@@ -188,15 +195,33 @@ do-logging "Action: $ACTION $OBJECT"
 
 check-dirs-exist
 
-# status is an alias for running
-if [ "$ACTION" == "$STATUS" ]; then
-    ACTION=$RUNNING
-fi
-
-# stop and kill are aliases for terminate
-if [ "$ACTION" == "$STOP" ] || [ "$ACTION" == "$KILL" ]; then
-    ACTION=$TERMINATE
-fi
+# aliases
+case $ACTION in
+    $STATUS)
+        ACTION=$RUNNING
+        ;;
+    $STOP)
+        ACTION=$POWEROFF
+        ;;
+    $KILL)
+        ACTION=$TERMINATE
+        ;;
+    $ATTACH)
+        ACTION=$RESUME
+        ;;
+    $CONNECT)
+        ACTION=$LOGIN
+        ;;
+    $RESTART)
+        ACTION=$REBOOT
+        ;;
+    $START)
+        ACTION=$BOOT
+        ;;
+    $BCKSTART)
+        ACTION=$BCKBOOT
+        ;;
+esac
 
 if [ "$ACTION" == "$RUNNING" ]; then
     echo ""
@@ -225,10 +250,12 @@ function screen-up()
 OBJPATH=$PATHTO/$OBJECT
 screen_name=$(get_screen_name "$OBJECT")
 case $ACTION in
-$REMOVE | $TERMINATE)
-    # TODO: support stop/kill/terminate/poweroff differently
-    machinectl poweroff "$OBJECT"
-    if [[ $ACTION == $TERMINATE ]]; then
+$REMOVE | $TERMINATE | $POWEROFF)
+    if [[ $ACTION == $POWEROFF ]]; then
+        machinectl poweroff "$OBJECT"
+    fi
+
+    if [[ $ACTION == $REMOVE ]] || [[ $ACTION == $TERMINATE ]]; then
         machinectl terminate "$OBJECT"
     fi
 
@@ -236,9 +263,11 @@ $REMOVE | $TERMINATE)
         rm -rf $OBJPATH
     fi
     ;;
-$START | $BOOT | $BCKBOOT | $BCKSTART)
+$BOOT | $BCKBOOT)
     BOOT_OS_PATH=$OBJPATH
+    nspawn_args=""
     if [[ $OBJECT != "$TEMPLATE" ]]; then
+        nspawn_args="-b"
         if [ ! -d $BOOT_OS_PATH ]; then
             read -p "creating '$OBJECT', continue (y/n)? " yn
             if [[ $yn != "y" ]]; then
@@ -250,12 +279,7 @@ $START | $BOOT | $BCKBOOT | $BCKSTART)
     fi
     
     screen_args=""
-    nspawn_args=""
-    if [[ $ACTION == $BCKBOOT ]] || [[ $ACTION == $BOOT ]]; then
-        nspawn_args="-b"
-    fi
-
-    if [[ $ACTION == $BCKBOOT ]] || [[ $ACTION == $BCKSTART ]]; then
+    if [[ $ACTION == $BCKBOOT ]] ; then
         screen_args="-d -m"
     fi
     
@@ -276,6 +300,15 @@ $START | $BOOT | $BCKBOOT | $BCKSTART)
     fi
     do-logging "$CMD_TXT"
     eval $CMD_TXT
+    ;;
+$LOGIN)
+    machinectl login "$OBJECT"
+    ;;
+$SHELL)
+    machinectl shell "$OBJECT"
+    ;;
+$REBOOT)
+    machinectl reboot "$OBJECT"
     ;;
 $PACK)
     CURRENT_PWD=$PWD
