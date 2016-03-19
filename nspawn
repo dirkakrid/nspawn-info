@@ -18,7 +18,6 @@ DISCONNECT="disconnect"
 PACK="pack"
 VERSION="version"
 STOP="stop"
-UPDATE="update"
 KILL="kill"
 
 # overlayfs settings
@@ -39,7 +38,7 @@ ADDED_ARGS_SETTING="arguments"
 # Help/command aggregates
 SCRIPT_VERSION="1.4.1"
 NON_OPERS="$LIST $HELP $OPTIONS $RUNNING $OPERATIONS $VERSION $STATUS"
-ALL_OPTS="$REMOVE $START $BOOT $RESUME $TERMINATE $BCKBOOT $BCKSTART $PACK $NON_OPERS $STOP $UPDATE $KILL"
+ALL_OPTS="$REMOVE $START $BOOT $RESUME $TERMINATE $BCKBOOT $BCKSTART $PACK $NON_OPERS $STOP $KILL"
 
 # per instance inputs
 ACTION=$1
@@ -242,47 +241,6 @@ if [ "$ACTION" == "$RUNNING" ]; then
     screen -list | grep "$SCREEN_START*.*$SCREEN_END" | sort
     echo ""
     exit $?
-fi
-
-if [ "$ACTION" == "$UPDATE" ]; then
-    for item in $(list-items); do
-        if [ -z "$OBJECT" ]; then
-            echo
-            read -p "updating: $PATHTO/$item - continue (y/n)? " yn
-            if [ -z "$yn" ]; then
-                yn="y"
-            fi
-            if [[ "$yn" != "y" ]]; then
-                continue
-            fi
-        else
-            if [[ "$item" != "$OBJECT" ]]; then
-                continue
-            fi
-        fi
-        echo "starting update: $item"
-        screen_check=$(get_screen_name "$item")
-        screen -list | grep -q -F "$screen_check"
-        if [ $? -eq 0 ]; then
-            SKIP_KEY="skip"
-            FORCE_KEY="force"
-            KILL_KEY="kill"
-            read -p "$item is running: ($SKIP_KEY/$FORCE_KEY/$KILL_KEY)? " skf
-            do-logging "update command: $skf"
-            case $skf in
-                $FORCE_KEY)
-                    ;;
-                $KILL_KEY)
-                    machinectl terminate "$item"
-                    ;;
-                *)
-                    continue
-                    ;;
-            esac
-        fi
-        arch-chroot $PATHTO/$item /bin/bash -c 'pacman -Syu'
-    done
-    exit -1
 fi
 
 if [ -z "$OBJECT" ]; then

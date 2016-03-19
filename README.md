@@ -5,6 +5,7 @@ script provides the general structure of performing the following and is reasona
 ### Using the script
 * Download the nspawn script and check that all environment variables are set as preferred
 
+
 ### Setup/install
 * Run a script (sort of like this) and it should be all set
 ```text
@@ -34,6 +35,12 @@ export DISPLAY=:0
 ```text
 # Using debootstrap
 debootstrap --arch=amd64 unstable debian/
+```
+
+### Updating
+* Just 'arch-chroot' in and call pacman
+```
+arch-chroot /path/to/container /bin/bash -c 'pacman Syyu'
 ```
 
 ### Config file
