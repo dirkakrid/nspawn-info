@@ -189,7 +189,7 @@ $VERSION)
     ;;
 esac
 
-if [ $ENABLE_HOST -eq 1 ]; then
+if [ $ENABLE_XHOST -eq 1 ]; then
     xhost +local: > /dev/null 2>&1
 fi
 
