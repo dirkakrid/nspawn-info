@@ -14,16 +14,10 @@ STATUS="status"
 TERMINATE="terminate"
 BCKBOOT="background"
 BCKSTART="detached"
-DISCONNECT="disconnect"
 PACK="pack"
 VERSION="version"
 STOP="stop"
 KILL="kill"
-
-# overlayfs settings
-OVERLAY_OS="os"
-OVERLAY_WORKING="wd"
-OVERLAY_FILES="fs"
 
 # Screen naming/settings
 SCREEN_START="nspawn-"
@@ -32,7 +26,6 @@ SCREEN_END="-container"
 # Config file
 CONFIG_FILE_NAME=".nspawn-info"
 CONFIG_FILE_OFFSET="/.config/$CONFIG_FILE_NAME"
-OVERLAY_SETTING="overlay"
 ADDED_ARGS_SETTING="arguments"
 
 # Help/command aggregates
@@ -61,7 +54,6 @@ ENV_ARGS_VALUE="${NSPAWN_ENV_PREFIX}ARGS"
 ENV_CONTAINER_VALUE="${NSPAWN_ENV_PREFIX}CONTAINERS"
 ENV_XHOST_VALUE="${NSPAWN_ENV_PREFIX}XHOST"
 ENV_SCREEN_VALUE="${NSPAWN_ENV_PREFIX}SCREEN"
-ENV_OVERLAY_VALUE="${NSPAWN_ENV_PREFIX}OVERLAY"
 ENV_TEMPLATE_VALUE="${NSPAWN_ENV_PREFIX}TEMPLATE"
 SCRIPT_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
 SCRIPTLOCATION=$SCRIPT_PATH/nspawn
@@ -69,14 +61,9 @@ COMMON_ARGS=$(get-environment-setting "$ENV_ARGS_VALUE")
 PATHTO=$(get-environment-setting "$ENV_CONTAINER_VALUE" "$SCRIPT_PATH/containers")
 ENABLE_X=$(get-environment-setting "$ENV_XHOST_VALUE" 1)
 ENABLE_SCREEN=$(get-environment-setting "$ENV_SCREEN_VALUE" 0)
-ENABLE_OVERLAY=$(get-environment-setting "$ENV_OVERLAY_VALUE" 0)
 TEMPLATE=$(get-environment-setting "$ENV_TEMPLATE_VALUE" "template")
 NSPAWN_SYSTEMD_CAT=$(get-environment-setting "$ENV_JOURNAL_VALUE" "nspawn")
 CONTAINER_CONFIG="$PATHTO/$CONFIG_FILE_NAME"
-
-if [ $ENABLE_OVERLAY -eq 1 ]; then
-    ALL_OPTS=$ALL_OPTS" $DISCONNECT"
-fi
 
 if [[ "$OBJECT" == */ ]]; then
     OBJECT=${OBJECT::-1}
@@ -105,8 +92,6 @@ function print_help()
     printf "\t\t$ENABLE_X\n"
     printf "\t$ENV_SCREEN_VALUE\tEnable screen to control/background containers\n"
     printf "\t\t$ENABLE_SCREEN\n"
-    printf "\t$ENV_OVERLAY_VALUE\tEnable the use of overlayfs\n"
-    printf "\t\t$ENABLE_OVERLAY\n"
     printf "\t$ENV_TEMPLATE_VALUE\tTemplate name\n"
     printf "\t\t$TEMPLATE\n"
     printf "\t$ENV_JOURNAL_VALUE\tJournal category\n"
@@ -143,16 +128,6 @@ function get-config-entry()
     fi
 
     echo $RESULT
-}
-
-function do_umount()
-{
-    if [ ! -d "$1" ]; then
-        echo "Object does not exist"
-        exit -1
-    fi
-
-    umount $1/$OVERLAY_FILES
 }
 
 function get_screen_name()
@@ -249,9 +224,6 @@ fi
 
 USER_CONFIG=$(eval echo "~$SUDO_USER")
 ADDED_ARGS=$(get-config-value "$USER_CONFIG" "$OBJECT" "$ADDED_ARGS_SETTING" "")
-if [[ $OBJECT != "$TEMPLATE" ]]; then
-    ENABLE_OVERLAY=$(get-config-value "$USER_CONFIG" "$OBJECT" "$OVERLAY_SETTING" "$ENABLE_OVERLAY")
-fi
 
 function screen-up()
 {
@@ -262,7 +234,7 @@ function screen-up()
 OBJPATH=$PATHTO/$OBJECT
 screen_name=$(get_screen_name "$OBJECT")
 case $ACTION in
-$DISCONNECT | $REMOVE | $TERMINATE)
+$REMOVE | $TERMINATE)
     if [ $ENABLE_SCREEN -eq 1 ]; then
         is_up=$(screen-up "$screen-name")
         if [ $is_up -eq 0 ]; then
@@ -274,10 +246,6 @@ $DISCONNECT | $REMOVE | $TERMINATE)
         machinectl terminate "$OBJECT"
     fi
 
-    if [ $ENABLE_OVERLAY -eq 1 ]; then
-        do_umount $OBJPATH
-    fi
- 
     if [[ $ACTION == $REMOVE ]]; then
         rm -rf $OBJPATH
     fi
@@ -285,25 +253,13 @@ $DISCONNECT | $REMOVE | $TERMINATE)
 $START | $BOOT | $BCKBOOT | $BCKSTART)
     BOOT_OS_PATH=$OBJPATH
     if [[ $OBJECT != "$TEMPLATE" ]]; then
-        if [ $ENABLE_OVERLAY -eq 1 ]; then
-            BOOT_OS_PATH="$OBJPATH/$OVERLAY_FILES"
-            mkdir -p $OBJPATH
-            mkdir -p $OBJPATH/$OVERLAY_OS
-            mkdir -p $BOOT_OS_PATH
-            mkdir -p $OBJPATH/$OVERLAY_WORKING
-            mount | grep -q "$OBJPATH/$OVERLAY_FILES"
-            if [ $? -ne 0 ]; then
-                mount -t overlay -o lowerdir=$PATHTO/$TEMPLATE,upperdir=$OBJPATH/$OVERLAY_OS,workdir=$OBJPATH/$OVERLAY_WORKING overlay $BOOT_OS_PATH/
+        if [ ! -d $BOOT_OS_PATH ]; then
+            read -p "creating '$OBJECT', continue (y/n)? " yn
+            if [[ $yn != "y" ]]; then
+                exit -1
             fi
-        else
-            if [ ! -d $BOOT_OS_PATH ]; then
-                read -p "creating '$OBJECT', continue (y/n)? " yn
-                if [[ $yn != "y" ]]; then
-                    exit -1
-                fi
-                echo "Setting up $OBJECT for first-time use (this may take a moment)..."
-                cp -R $PATHTO/$TEMPLATE $BOOT_OS_PATH
-            fi
+            echo "Setting up $OBJECT for first-time use (this may take a moment)..."
+            cp -R $PATHTO/$TEMPLATE $BOOT_OS_PATH
         fi
     fi
     
