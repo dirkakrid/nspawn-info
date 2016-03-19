@@ -52,7 +52,6 @@ NSPAWN_ENV_PREFIX="NSPAWN_INFO_"
 ENV_JOURNAL_VALUE="${NSPAWN_ENV_PREFIX}JOURNAL"
 ENV_ARGS_VALUE="${NSPAWN_ENV_PREFIX}ARGS"
 ENV_CONTAINER_VALUE="${NSPAWN_ENV_PREFIX}CONTAINERS"
-ENV_XHOST_VALUE="${NSPAWN_ENV_PREFIX}XHOST"
 ENV_SCREEN_VALUE="${NSPAWN_ENV_PREFIX}SCREEN"
 ENV_TEMPLATE_VALUE="${NSPAWN_ENV_PREFIX}TEMPLATE"
 SCRIPT_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
@@ -88,8 +87,6 @@ function print_help()
     printf "\t\t$COMMON_ARGS\n"
     printf "\t$ENV_CONTAINER_VALUE\tLocation of container files\n"
     printf "\t\t$PATHTO\n"
-    printf "\t$ENV_XHOST_VALUE\tEnable X sharing\n"
-    printf "\t\t$ENABLE_X\n"
     printf "\t$ENV_SCREEN_VALUE\tEnable screen to control/background containers\n"
     printf "\t\t$ENABLE_SCREEN\n"
     printf "\t$ENV_TEMPLATE_VALUE\tTemplate name\n"
@@ -177,11 +174,6 @@ $VERSION)
     exit 0
     ;;
 esac
-
-# Make X available
-if [ $ENABLE_X -eq 1 ]; then
-    xhost +local: > /dev/null 2>&1
-fi
 
 if [ -z "$ACTION" ]; then
     print_help "Action is required!"
