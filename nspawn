@@ -58,7 +58,6 @@ SCRIPT_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
 SCRIPTLOCATION=$SCRIPT_PATH/nspawn
 COMMON_ARGS=$(get-environment-setting "$ENV_ARGS_VALUE")
 PATHTO=$(get-environment-setting "$ENV_CONTAINER_VALUE" "$SCRIPT_PATH/containers")
-ENABLE_X=$(get-environment-setting "$ENV_XHOST_VALUE" 1)
 ENABLE_SCREEN=$(get-environment-setting "$ENV_SCREEN_VALUE" 0)
 TEMPLATE=$(get-environment-setting "$ENV_TEMPLATE_VALUE" "template")
 NSPAWN_SYSTEMD_CAT=$(get-environment-setting "$ENV_JOURNAL_VALUE" "nspawn")
@@ -227,13 +226,8 @@ OBJPATH=$PATHTO/$OBJECT
 screen_name=$(get_screen_name "$OBJECT")
 case $ACTION in
 $REMOVE | $TERMINATE)
-    if [ $ENABLE_SCREEN -eq 1 ]; then
-        is_up=$(screen-up "$screen-name")
-        if [ $is_up -eq 0 ]; then
-            screen -X 'exit'
-        fi
-    fi
-
+    # TODO: support stop/kill/terminate/poweroff differently
+    machinectl poweroff "$OBJECT"
     if [[ $ACTION == $TERMINATE ]]; then
         machinectl terminate "$OBJECT"
     fi
