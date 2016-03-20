@@ -71,6 +71,11 @@ if [[ "$OBJECT" == */ ]]; then
     OBJECT=${OBJECT::-1}
 fi
 
+function list-items()
+{
+    find $PATHTO/ -maxdepth 1 -type d -printf "%f\n" | grep -v '/$' | sort
+}
+
 function print_help()
 {
     ERR=$(echo $1 | cut -d " " -f 1)
@@ -80,7 +85,7 @@ function print_help()
 
     printf "Usage: nspawn [ACTION] [OBJECT?]\n"
     printf "%0s\n" "Provides a simple wrapper around systemd-nspawn"
-    printf "\t%0s\t%20s\n" "ACTION" ""
+    printf "\t%0s\n" "ACTION"
     NON_OPERS_HELP="|"$(echo $NON_OPERS | sed "s/ /\|/g")"|"
     for item in $(echo $ALL_OPTS | xargs -n1 | sort); do
         HELP_LINE=""
@@ -153,7 +158,10 @@ function print_help()
         HELP_TEXT="$HELP_TEXT $HELP_LINE"
         printf "\t\t%10s\t%20s\n" "$item" "$HELP_TEXT"
     done
-    printf "\n\t%0s\t%20s\n" "OBJECT" "The machine name to interact with"
+    printf "\n\t%0s\n" "OBJECT"
+    for item in $(list-items); do
+        printf "\t\t%10s\n" "$item"
+    done
     printf "\n"
     printf "\n"
     printf "Environment variables:\n"
@@ -214,11 +222,6 @@ function check-dir()
         echo "Invalid setting for $1"
         exit -1
     fi
-}
-
-function list-items()
-{
-    find $PATHTO/ -maxdepth 1 -type d -printf "%f\n" | grep -v '/$' | sort
 }
 
 function check-dirs-exist()
@@ -333,7 +336,11 @@ $REMOVE | $TERMINATE | $POWEROFF)
 $BOOT | $BCKBOOT | $DEBUG | $CREATE)
     BOOT_OS_PATH=$OBJPATH
     nspawn_args=""
+    screen_args=""
     if [[ $OBJECT != "$TEMPLATE" ]]; then
+        if [[ $ACTION == $BCKBOOT ]] ; then
+            screen_args="-d -m"
+        fi
         nspawn_args="-b"
         if [[ $ACTION == $DEBUG ]] || [[ $ACTION == $CREATE ]]; then
             nspawn_args=""
@@ -353,11 +360,6 @@ $BOOT | $BCKBOOT | $DEBUG | $CREATE)
         fi
     fi
     
-    screen_args=""
-    if [[ $ACTION == $BCKBOOT ]] ; then
-        screen_args="-d -m"
-    fi
-   
     if [ $running -eq 1 ]; then 
         echo "$OBJECT is already running"
         exit -1
