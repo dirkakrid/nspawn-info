@@ -2,15 +2,13 @@
 
 # Keywords
 REMOVE="remove"
-START="start"
-BOOT="boot"
+BOOT="start"
 RESUME="resume"
 OPTIONS="options"
 OPERATIONS="operations"
 HELP="help"
 LIST="list"
 RUNNING="running"
-STATUS="status"
 TERMINATE="terminate"
 BCKBOOT="background"
 BCKSTART="detached"
@@ -29,6 +27,7 @@ COPY="copy"
 CLONE="clone"
 NEW="new"
 UPDATE="update"
+DEBUG="debug"
 
 # Screen naming/settings
 SCREEN_START="nspawn-"
@@ -41,8 +40,8 @@ ADDED_ARGS_SETTING="arguments"
 
 # Help/command aggregates
 SCRIPT_VERSION="1.5.0"
-NON_OPERS="$LIST $HELP $OPTIONS $RUNNING $OPERATIONS $VERSION $STATUS"
-ALL_OPTS="$UPDATE $COPY $CLONE $NEW $SHELL $CONNECT $LOGIN $REBOOT $RESTART $ATTACH $POWEROFF $REMOVE $START $BOOT $RESUME $TERMINATE $BCKBOOT $BCKSTART $PACK $NON_OPERS $STOP $KILL"
+NON_OPERS="$LIST $HELP $OPTIONS $RUNNING $OPERATIONS $VERSION"
+ALL_OPTS="$DEBUG $UPDATE $COPY $CLONE $NEW $SHELL $CONNECT $LOGIN $REBOOT $RESTART $ATTACH $POWEROFF $REMOVE $BOOT $RESUME $TERMINATE $BCKBOOT $BCKSTART $PACK $NON_OPERS $STOP $KILL"
 
 # per instance inputs
 ACTION=$1
@@ -208,9 +207,6 @@ check-dirs-exist
 
 # aliases
 case $ACTION in
-    $STATUS)
-        ACTION=$RUNNING
-        ;;
     $STOP)
         ACTION=$POWEROFF
         ;;
@@ -226,7 +222,7 @@ case $ACTION in
     $RESTART)
         ACTION=$REBOOT
         ;;
-    $START | $COPY | $CLONE | $NEW)
+    $COPY | $CLONE | $NEW)
         ACTION=$BOOT
         ;;
     $BCKSTART)
@@ -296,11 +292,13 @@ $REMOVE | $TERMINATE | $POWEROFF)
         rm -rf $OBJPATH
     fi
     ;;
-$BOOT | $BCKBOOT)
+$BOOT | $BCKBOOT | $DEBUG)
     BOOT_OS_PATH=$OBJPATH
     nspawn_args=""
     if [[ $OBJECT != "$TEMPLATE" ]]; then
-        nspawn_args="-b"
+        if [[ $ACTION != $DEBUG ]]; then
+            nspawn_args="-b"
+        fi
         if [ ! -d $BOOT_OS_PATH ]; then
             read -p "creating '$OBJECT', continue (y/n)? " yn
             if [[ $yn != "y" ]]; then
