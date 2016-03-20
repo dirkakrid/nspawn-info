@@ -9,25 +9,17 @@ OPERATIONS="operations"
 HELP="help"
 LIST="list"
 RUNNING="running"
-TERMINATE="terminate"
+TERMINATE="kill"
 BCKBOOT="background"
-BCKSTART="detached"
 PACK="pack"
 VERSION="version"
-STOP="stop"
-KILL="kill"
-POWEROFF="poweroff"
+POWEROFF="stop"
 SHELL="shell"
-CONNECT="connect"
-LOGIN="login"
+LOGIN="connect"
 REBOOT="reboot"
-RESTART="restart"
-ATTACH="attach"
-COPY="copy"
-CLONE="clone"
-NEW="new"
 UPDATE="update"
 DEBUG="debug"
+CREATE="create"
 
 # Screen naming/settings
 SCREEN_START="nspawn-"
@@ -41,7 +33,7 @@ ADDED_ARGS_SETTING="arguments"
 # Help/command aggregates
 SCRIPT_VERSION="1.5.0"
 NON_OPERS="$LIST $HELP $OPTIONS $RUNNING $OPERATIONS $VERSION"
-ALL_OPTS="$DEBUG $UPDATE $COPY $CLONE $NEW $SHELL $CONNECT $LOGIN $REBOOT $RESTART $ATTACH $POWEROFF $REMOVE $BOOT $RESUME $TERMINATE $BCKBOOT $BCKSTART $PACK $NON_OPERS $STOP $KILL"
+ALL_OPTS="$DEBUG $CREATE $UPDATE $SHELL $LOGIN $REBOOT $POWEROFF $REMOVE $BOOT $RESUME $TERMINATE $BCKBOOT $PACK $NON_OPERS"
 
 # per instance inputs
 ACTION=$1
@@ -207,26 +199,8 @@ check-dirs-exist
 
 # aliases
 case $ACTION in
-    $STOP)
-        ACTION=$POWEROFF
-        ;;
-    $KILL)
-        ACTION=$TERMINATE
-        ;;
-    $ATTACH)
-        ACTION=$RESUME
-        ;;
-    $CONNECT)
-        ACTION=$LOGIN
-        ;;
-    $RESTART)
-        ACTION=$REBOOT
-        ;;
-    $COPY | $CLONE | $NEW)
+    $CREATE)
         ACTION=$BOOT
-        ;;
-    $BCKSTART)
-        ACTION=$BCKBOOT
         ;;
 esac
 
