@@ -78,11 +78,82 @@ function print_help()
         printf "\nError: %0s\n\n" "$1"
     fi
 
-    printf "Usage: nspawn [ACTION] [OBJECT]\n"
+    printf "Usage: nspawn [ACTION] [OBJECT?]\n"
     printf "%0s\n" "Provides a simple wrapper around systemd-nspawn"
-    printf "\t%0s\t%20s\n" "ACTION" "The action to perform"
-    printf "\t\t($ALL_OPTS)\n"
-    printf "\t%0s\t%20s\n" "OBJECT" "The machine name to interact with"
+    printf "\t%0s\t%20s\n" "ACTION" ""
+    NON_OPERS_HELP="|"$(echo $NON_OPERS | sed "s/ /\|/g")"|"
+    for item in $(echo $ALL_OPTS | xargs -n1 | sort); do
+        HELP_LINE=""
+        echo $NON_OPERS_HELP | grep -q "|$item|"
+        if [ $? -eq 1 ]; then
+            HELP_LINE="[OBJECT]"
+        fi
+        case $item in
+            $REMOVE)
+                HELP_TEXT="stop and remove/destroy the container"
+                ;;
+            $BOOT)
+                HELP_TEXT="start/boot the container"
+                ;;
+            $RESUME)
+                HELP_TEXT="restore the start/boot connection"
+                ;;
+            $OPTIONS)
+                HELP_TEXT="available option list"
+                ;;
+            $OPERATIONS)
+                HELP_TEXT="container operation list"
+                ;;
+            $HELP)
+                HELP_TEXT="display this help message"
+                ;;
+            $LIST)
+                HELP_TEXT="list containers on disk"
+                ;;
+            $RUNNING)
+                HELP_TEXT="display running container information"
+                ;;
+            $TERMINATE)
+                HELP_TEXT="stop/terminate a running container"
+                ;;
+            $PACK)
+                HELP_TEXT="package/archive a container"
+                ;;
+            $VERSION)
+                HELP_TEXT="print version information"
+                ;;
+            $DEBUG)
+                HELP_TEXT="connect to a container via 'simple' shell"
+                ;;
+            $POWEROFF)
+                HELP_TEXT="poweroff a container"
+                ;;
+            $SHELL)
+                HELP_TEXT="connect with a shell to a running container"
+                ;;
+            $LOGIN)
+                HELP_TEXT="get a new login session on a running container"
+                ;;
+            $REBOOT)
+                HELP_TEXT="reboot a container"
+                ;;
+            $UPDATE)
+                HELP_TEXT="update a container on the filesystem"
+                ;;
+            $CREATE)
+                HELP_TEXT="create a new container"
+                ;;
+            $BCKBOOT)
+                HELP_TEXT="start and background"
+                ;;
+            *)
+                HELP_TEXT=""
+                ;;
+        esac
+        HELP_TEXT="$HELP_TEXT $HELP_LINE"
+        printf "\t\t%10s\t%20s\n" "$item" "$HELP_TEXT"
+    done
+    printf "\n\t%0s\t%20s\n" "OBJECT" "The machine name to interact with"
     printf "\n"
     printf "\n"
     printf "Environment variables:\n"
@@ -197,13 +268,6 @@ do-logging "Action: $ACTION $OBJECT"
 
 check-dirs-exist
 
-# aliases
-case $ACTION in
-    $CREATE)
-        ACTION=$BOOT
-        ;;
-esac
-
 function print-running()
 {
     printf "\n%20s%20s%30s" "$1" "$2" "$3"
@@ -266,20 +330,26 @@ $REMOVE | $TERMINATE | $POWEROFF)
         rm -rf $OBJPATH
     fi
     ;;
-$BOOT | $BCKBOOT | $DEBUG)
+$BOOT | $BCKBOOT | $DEBUG | $CREATE)
     BOOT_OS_PATH=$OBJPATH
     nspawn_args=""
     if [[ $OBJECT != "$TEMPLATE" ]]; then
-        if [[ $ACTION != $DEBUG ]]; then
-            nspawn_args="-b"
+        nspawn_args="-b"
+        if [[ $ACTION == $DEBUG ]] || [[ $ACTION == $CREATE ]]; then
+            nspawn_args=""
         fi
         if [ ! -d $BOOT_OS_PATH ]; then
-            read -p "creating '$OBJECT', continue (y/n)? " yn
-            if [[ $yn != "y" ]]; then
+            if [[ $ACTION == $CREATE ]]; then
+                read -p "creating '$OBJECT', continue (y/n)? " yn
+                if [[ $yn != "y" ]]; then
+                    exit -1
+                fi
+                echo "Setting up $OBJECT for first-time use (this may take a moment)..."
+                cp -R $PATHTO/$TEMPLATE $BOOT_OS_PATH
+            else
+                echo "$OBJECT does not exist"
                 exit -1
             fi
-            echo "Setting up $OBJECT for first-time use (this may take a moment)..."
-            cp -R $PATHTO/$TEMPLATE $BOOT_OS_PATH
         fi
     fi
     
