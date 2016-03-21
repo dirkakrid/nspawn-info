@@ -273,17 +273,23 @@ check-dirs-exist
 
 function print-running()
 {
-    printf "\n%20s%20s%20s" "$1" "$2" "$3"
+    printf "\n%s (machinectl=%s,screen=%s)" "$1" "$2" "$3"
 }
 
 if [ "$ACTION" == "$RUNNING" ]; then
-    print-running "name" "machinectl" "screen"
-    print-running "----" "----------" "------"
     for item in $(list-items); do
         machine_ctl=$(machinectl list | grep -E "^$item " | cut -d " " -f 1)
+        is_ctl="no"
+        if [[ "$machine_ctl" == "$item" ]]; then
+            is_ctl="yes"
+        fi
         item_name=$(get_screen_name "$item")
+        is_screen="no"
         screen_as=$(screen -list | grep "$item_name" | cut -d "." -f 2 | cut -d "(" -f 1 | xargs | sed "s/^$SCREEN_START//g" | sed "s/$SCREEN_END$//g")
-        print-running "$item" "$machine_ctl" "$screen_as"
+        if [[ "$screen_as" == "$item" ]]; then
+            is_screen="yes"
+        fi
+        print-running "$item" "$is_ctl" "$is_screen"
         
     done
     echo
