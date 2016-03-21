@@ -273,7 +273,7 @@ check-dirs-exist
 
 function print-running()
 {
-    printf "\n%20s%20s%30s" "$1" "$2" "$3"
+    printf "\n%20s%20s%20s" "$1" "$2" "$3"
 }
 
 if [ "$ACTION" == "$RUNNING" ]; then
