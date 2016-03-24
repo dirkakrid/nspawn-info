@@ -410,7 +410,7 @@ $UPDATE | $PACK)
     if [[ $ACTION == $PACK ]]; then
         tar -cvpzf $CURRENT_PWD/nspawn-$OBJECT.tar.gz --one-file-system "$OBJECT/"
     else
-        arch-chroot $OBJPATH /bin/bash -c 'pacman -Syyu'
+        arch-chroot $OBJPATH /bin/bash -c 'pacman -Syyu && pacman -Sc'
     fi
     cd $CURRENT_PWD
     ;;
