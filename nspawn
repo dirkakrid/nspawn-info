@@ -340,7 +340,18 @@ $REMOVE | $TERMINATE | $POWEROFF)
         machinectl poweroff "$OBJECT"
     fi
 
-    if [[ $ACTION == $REMOVE ]] || [[ $ACTION == $TERMINATE ]]; then
+    do_terminate=0
+    if [[ $ACTION == $REMOVE ]]; then
+        if [ $running -eq 1 ]; then
+            do_terminate=1
+        fi 
+    fi
+
+    if [[ $ACTION == $TERMINATE ]]; then
+        do_terminate=1
+    fi
+
+    if [ $do_terminate -eq 1 ]; then
         machinectl terminate "$OBJECT"
     fi
 
