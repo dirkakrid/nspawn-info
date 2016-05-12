@@ -17,7 +17,6 @@ POWEROFF="stop"
 SHELL="shell"
 LOGIN="connect"
 REBOOT="reboot"
-UPDATE="update"
 DEBUG="debug"
 CREATE="create"
 
@@ -33,7 +32,7 @@ ADDED_ARGS_SETTING="arguments"
 # Help/command aggregates
 SCRIPT_VERSION="1.5.0"
 NON_OPERS="$LIST $HELP $OPTIONS $RUNNING $OPERATIONS $VERSION"
-ALL_OPTS="$DEBUG $CREATE $UPDATE $SHELL $LOGIN $REBOOT $POWEROFF $REMOVE $BOOT $RESUME $TERMINATE $BCKBOOT $PACK $NON_OPERS"
+ALL_OPTS="$DEBUG $CREATE $SHELL $LOGIN $REBOOT $POWEROFF $REMOVE $BOOT $RESUME $TERMINATE $BCKBOOT $PACK $NON_OPERS"
 
 # per instance inputs
 ACTION=$1
@@ -141,9 +140,6 @@ function print_help()
                 ;;
             $REBOOT)
                 HELP_TEXT="reboot a container"
-                ;;
-            $UPDATE)
-                HELP_TEXT="update a container on the filesystem"
                 ;;
             $CREATE)
                 HELP_TEXT="create a new container"
@@ -410,7 +406,7 @@ $SHELL)
 $REBOOT)
     machinectl reboot "$OBJECT"
     ;;
-$UPDATE | $PACK)
+$PACK)
     if [ $running -eq 1 ]; then
         echo "$OBJECT is running...skipping $ACTION"
         exit -1
@@ -418,11 +414,7 @@ $UPDATE | $PACK)
     
     CURRENT_PWD=$PWD
     cd $PATHTO
-    if [[ $ACTION == $PACK ]]; then
-        tar -cvpzf $CURRENT_PWD/nspawn-$OBJECT.tar.gz --one-file-system "$OBJECT/"
-    else
-        arch-chroot $OBJPATH /bin/bash -c 'pacman -Syyu && pacman -Sc'
-    fi
+    tar -cvpzf $CURRENT_PWD/nspawn-$OBJECT.tar.gz --one-file-system "$OBJECT/"
     cd $CURRENT_PWD
     ;;
 $RESUME)
