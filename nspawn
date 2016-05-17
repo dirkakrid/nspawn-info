@@ -66,6 +66,7 @@ NSPAWN_SYSTEMD_CAT=$(get-environment-setting "$ENV_JOURNAL_VALUE" "nspawn")
 ENABLE_XHOST=$(get-environment-setting "$ENV_XHOST_VALUE" 1)
 CONTAINER_CONFIG="$PATHTO/$CONFIG_FILE_NAME"
 NSPAWN_BOOT_ARGS="-b"
+NSPAWN_BACK_ARGS="-d -m"
 
 if [[ "$OBJECT" == */ ]]; then
     OBJECT=${OBJECT::-1}
@@ -362,7 +363,7 @@ $BOOT | $BCKBOOT | $DEBUG | $CREATE)
     screen_args=""
     if [[ $OBJECT != "$TEMPLATE" ]]; then
         if [[ $ACTION == $BCKBOOT ]] ; then
-            screen_args="-d -m"
+            screen_args=$NSPAWN_BACK_ARGS
         fi
         nspawn_args=$NSPAWN_BOOT_ARGS
         if [[ $ACTION == $DEBUG ]] || [[ $ACTION == $CREATE ]]; then
@@ -370,11 +371,18 @@ $BOOT | $BCKBOOT | $DEBUG | $CREATE)
         fi
         if [ ! -d $BOOT_OS_PATH ]; then
             if [[ $ACTION == $CREATE ]]; then
-                read -p "creating '$OBJECT', (d)ebug/(s)tart/(c)ancel? " yn
-                if [[ $yn != "s" ]] && [[ $yn != "d" ]]; then
+                ind_debug="d"
+                ind_start="s"
+                ind_back="b"
+                read -p "creating '$OBJECT', ($ind_debug)ebug/($ind_start)tart/($ind_back)ackground/(c)ancel? " yn
+                if [[ $yn != "$ind_start" ]] && [[ $yn != "$ind_debug" ]] && [[ $yn != "$ind_back" ]]; then
                     exit -1
                 fi
-                if [[ $yn == "s" ]]; then
+                if [[ $yn == "$ind_back" ]]; then
+                    screen_args=$NSPAWN_BACK_ARGS
+                    yn=$ind_start
+                fi
+                if [[ $yn == "$ind_start" ]]; then
                     nspawn_args=$NSPAWN_BOOT_ARGS
                 fi
                 echo "Setting up $OBJECT for first-time use (this may take a moment)..."
