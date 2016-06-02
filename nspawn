@@ -68,9 +68,27 @@ CONTAINER_CONFIG="$PATHTO/$CONFIG_FILE_NAME"
 NSPAWN_BOOT_ARGS="-b"
 NSPAWN_BACK_ARGS="-d -m"
 
+if [[ "$ACTION" == "$TEMPLATE" ]]; then
+    ACTION=$DEBUG
+    OBJECT=$TEMPLATE
+fi
+
+if [[ "$OBJECT" == "$TEMPLATE" ]]; then
+    case $ACTION in
+        $PACK | $DEBUG | $BOOT)
+            ;;
+        *)
+            echo "$ACTION is invalid for the template"
+            exit -1
+            ;;
+    esac
+fi
+
 if [[ "$OBJECT" == */ ]]; then
     OBJECT=${OBJECT::-1}
 fi
+
+ALL_OPTS="$ALL_OPTS $TEMPLATE"
 
 function list-items()
 {
@@ -148,6 +166,9 @@ function print_help()
                 ;;
             $BCKBOOT)
                 HELP_TEXT="start and background"
+                ;;
+            $TEMPLATE)
+                HELP_TEXT="start the template"
                 ;;
             *)
                 HELP_TEXT=""
